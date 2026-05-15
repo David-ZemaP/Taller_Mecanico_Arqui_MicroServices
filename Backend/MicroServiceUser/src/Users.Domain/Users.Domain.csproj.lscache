@@ -63,6 +63,7 @@ Entities/
 Enums/NivelAcceso.cs
 Interfaces/
  IAuthenticationHelper.cs
+ IMailSender.cs
  IPasswordHasher.cs
  IPasswordSecurity.cs
  IRolRepository.cs

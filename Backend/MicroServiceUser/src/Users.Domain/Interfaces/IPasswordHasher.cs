@@ -1,4 +1,4 @@
-namespace Taller_Mecanico_Users.Domain.Ports
+namespace Taller_Mecanico_Users.Domain.Interfaces
 {
     public interface IPasswordHasher
     {

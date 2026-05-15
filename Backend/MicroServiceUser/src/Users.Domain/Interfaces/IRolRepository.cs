@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Taller_Mecanico_Users.Domain.Entities;
 
-namespace Taller_Mecanico_Users.Domain.Ports
+namespace Taller_Mecanico_Users.Domain.Interfaces
 {
     public interface IRolRepository
     {

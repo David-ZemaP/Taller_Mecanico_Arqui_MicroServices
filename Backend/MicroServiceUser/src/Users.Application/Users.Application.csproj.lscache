@@ -54,10 +54,23 @@ TemporaryDependencyNodeTargetIdentifier=net10.0
 /warnaserror+:NU1605,SYSLIB0011
 
 [sourceFiles]
+Interfaces/
+ IJwtSettings.cs
+ IJwtTokenGenerator.cs
 obj/Debug/net10.0/
  .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
  Users.Application.AssemblyInfo.cs
  Users.Application.GlobalUsings.g.cs
+UseCases/Auth/
+ ChangePasswordUseCase.cs
+ LoginUseCase.cs
+ ResetPasswordUseCase.cs
+UseCases/Users/
+ CreateUserUseCase.cs
+ DeleteUserUseCase.cs
+ GetUserByIdUseCase.cs
+ GetUsersUseCase.cs
+ UpdateUserUseCase.cs
 
 [metadataReferences]
 ../Users.Domain/obj/Debug/net10.0/ref/Users.Domain.dll
@@ -229,6 +242,9 @@ obj/Debug/net10.0/
  System.Xml.XPath.dll
  System.Xml.XPath.XDocument.dll
  WindowsBase.dll
+<NUGET>/
+ microsoft.extensions.dependencyinjection.abstractions/8.0.0/lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
+ microsoft.extensions.logging.abstractions/8.0.0/lib/net8.0/Microsoft.Extensions.Logging.Abstractions.dll
 
 [analyzerReferences]
 <DOTNET>/packs/Microsoft.NETCore.App.Ref/10.0.7/analyzers/dotnet/cs/
@@ -241,6 +257,7 @@ obj/Debug/net10.0/
 <DOTNET>/sdk/10.0.107/Sdks/Microsoft.NET.Sdk/analyzers/
  Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll
  Microsoft.CodeAnalysis.NetAnalyzers.dll
+<NUGET>/microsoft.extensions.logging.abstractions/8.0.0/analyzers/dotnet/roslyn4.4/cs/Microsoft.Extensions.Logging.Generators.dll
 
 [analyzerConfigFiles]
 <DOTNET>/sdk/10.0.107/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_10_default.globalconfig

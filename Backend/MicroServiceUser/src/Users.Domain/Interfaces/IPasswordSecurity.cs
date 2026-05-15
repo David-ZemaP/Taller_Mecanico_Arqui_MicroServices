@@ -1,6 +1,6 @@
 using Taller_Mecanico_Users.Domain.Common;
 
-namespace Taller_Mecanico_Users.Domain.Ports
+namespace Taller_Mecanico_Users.Domain.Interfaces
 {
     public interface IPasswordSecurity
     {
