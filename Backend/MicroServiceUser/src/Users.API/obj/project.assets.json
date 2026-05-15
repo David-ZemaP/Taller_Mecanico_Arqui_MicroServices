@@ -2,7 +2,7 @@
   "version": 3,
   "targets": {
     "net10.0": {
-      "Microsoft.AspNetCore.OpenApi/10.0.2": {
+      "Microsoft.AspNetCore.OpenApi/10.0.7": {
         "type": "package",
         "dependencies": {
           "Microsoft.OpenApi": "2.0.0"
@@ -36,14 +36,51 @@
             "related": ".pdb;.xml"
           }
         }
+      },
+      "Users.Application/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "Users.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Users.Application.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Users.Application.dll": {}
+        }
+      },
+      "Users.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/Users.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Users.Domain.dll": {}
+        }
+      },
+      "Users.Infrastructure/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "Users.Application": "1.0.0",
+          "Users.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Users.Infrastructure.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Users.Infrastructure.dll": {}
+        }
       }
     }
   },
   "libraries": {
-    "Microsoft.AspNetCore.OpenApi/10.0.2": {
-      "sha512": "YuEjUNpsoZLs0I5ONt013Z+Udsz3f9sPUh1Xm59LN7+/Z8oVG/swCUYLBbANtfreiunWnoT2uk+5kst4s2jr3Q==",
+    "Microsoft.AspNetCore.OpenApi/10.0.7": {
+      "sha512": "vKiAcGXG0BwNVw3bOjjWRLnp9tR18dR7MiwpvC94h0yFS+zfnzGHzS/JmmgwUdRixrGxrlIMRAWrVc+2DfAGlg==",
       "type": "package",
-      "path": "microsoft.aspnetcore.openapi/10.0.2",
+      "path": "microsoft.aspnetcore.openapi/10.0.7",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -54,7 +91,7 @@
         "build/Microsoft.AspNetCore.OpenApi.targets",
         "lib/net10.0/Microsoft.AspNetCore.OpenApi.dll",
         "lib/net10.0/Microsoft.AspNetCore.OpenApi.xml",
-        "microsoft.aspnetcore.openapi.10.0.2.nupkg.sha512",
+        "microsoft.aspnetcore.openapi.10.0.7.nupkg.sha512",
         "microsoft.aspnetcore.openapi.nuspec"
       ]
     },
@@ -75,11 +112,28 @@
         "microsoft.openapi.2.0.0.nupkg.sha512",
         "microsoft.openapi.nuspec"
       ]
+    },
+    "Users.Application/1.0.0": {
+      "type": "project",
+      "path": "../Users.Application/Users.Application.csproj",
+      "msbuildProject": "../Users.Application/Users.Application.csproj"
+    },
+    "Users.Domain/1.0.0": {
+      "type": "project",
+      "path": "../Users.Domain/Users.Domain.csproj",
+      "msbuildProject": "../Users.Domain/Users.Domain.csproj"
+    },
+    "Users.Infrastructure/1.0.0": {
+      "type": "project",
+      "path": "../Users.Infrastructure/Users.Infrastructure.csproj",
+      "msbuildProject": "../Users.Infrastructure/Users.Infrastructure.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net10.0": [
-      "Microsoft.AspNetCore.OpenApi >= 10.0.2"
+      "Microsoft.AspNetCore.OpenApi >= 10.0.7",
+      "Users.Application >= 1.0.0",
+      "Users.Infrastructure >= 1.0.0"
     ]
   },
   "packageFolders": {
@@ -88,11 +142,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/MicroServiceUser.csproj",
-      "projectName": "MicroServiceUser",
-      "projectPath": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/MicroServiceUser.csproj",
+      "projectUniqueName": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/src/Users.API/Users.API.csproj",
+      "projectName": "Users.API",
+      "projectPath": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/src/Users.API/Users.API.csproj",
       "packagesPath": "/home/Pololi15/.nuget/packages/",
-      "outputPath": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/obj/",
+      "outputPath": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/src/Users.API/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/Pololi15/.nuget/NuGet/NuGet.Config"
@@ -107,7 +161,14 @@
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/src/Users.Application/Users.Application.csproj": {
+              "projectPath": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/src/Users.Application/Users.Application.csproj"
+            },
+            "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/src/Users.Infrastructure/Users.Infrastructure.csproj": {
+              "projectPath": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/src/Users.Infrastructure/Users.Infrastructure.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
@@ -128,7 +189,7 @@
         "dependencies": {
           "Microsoft.AspNetCore.OpenApi": {
             "target": "Package",
-            "version": "[10.0.2, )"
+            "version": "[10.0.7, )"
           }
         },
         "imports": [

@@ -1,4 +1,4 @@
-namespace MicroServiceUser;
+namespace Users.API;
 
 public class WeatherForecast
 {
