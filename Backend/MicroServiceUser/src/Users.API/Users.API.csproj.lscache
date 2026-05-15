@@ -55,13 +55,11 @@ TemporaryDependencyNodeTargetIdentifier=net10.0
 /warnaserror+:NU1605,SYSLIB0011
 
 [sourceFiles]
-Controllers/WeatherForecastController.cs
 obj/Debug/net10.0/
  .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
  Users.API.AssemblyInfo.cs
  Users.API.GlobalUsings.g.cs
 Program.cs
-WeatherForecast.cs
 
 [metadataReferences]
 ../
@@ -380,6 +378,7 @@ WeatherForecast.cs
 <NUGET>/
  microsoft.aspnetcore.openapi/10.0.7/lib/net10.0/Microsoft.AspNetCore.OpenApi.dll
  microsoft.openapi/2.0.0/lib/net8.0/Microsoft.OpenApi.dll
+ npgsql/10.0.2/lib/net10.0/Npgsql.dll
 
 [analyzerReferences]
 <DOTNET>/packs/Microsoft.AspNetCore.App.Ref/10.0.7/analyzers/dotnet/cs/
