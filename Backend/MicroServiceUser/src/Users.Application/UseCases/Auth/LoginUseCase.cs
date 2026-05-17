@@ -90,7 +90,7 @@ namespace Taller_Mecanico_Users.Application.UseCases.Auth
             {
                 Token = token,
                 RequiereCambioPassword = usuario.RequiereCambioPassword,
-                EsCliente = usuario.EsCliente
+                
             });
         }
     }
@@ -103,6 +103,5 @@ namespace Taller_Mecanico_Users.Application.UseCases.Auth
     {
         public string Token { get; set; } = string.Empty;
         public bool RequiereCambioPassword { get; set; }
-        public bool EsCliente { get; set; }
     }
 }

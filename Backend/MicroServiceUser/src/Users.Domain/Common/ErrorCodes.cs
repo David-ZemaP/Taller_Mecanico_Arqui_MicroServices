@@ -5,12 +5,7 @@ namespace Taller_Mecanico_Users.Domain.Common
         public const string DbError = "DB_ERROR";
         public const string DbInsertFailed = "DB_INSERT_FAILED";
 
-        public const string ClienteNotFound = "CLIENTE_NOT_FOUND";
-        public const string ClienteCiDuplicado = "CLIENTE_CI_DUPLICADO";
-
-        public const string EmpleadoNotFound = "EMPLEADO_NOT_FOUND";
-        public const string EmpleadoCiDuplicado = "EMPLEADO_CI_DUPLICADO";
-
+        
         public const string VehiculoNotFound = "VEHICULO_NOT_FOUND";
         public const string VehiculoPlacaDuplicada = "VEHICULO_PLACA_DUPLICADA";
 
@@ -23,7 +18,6 @@ namespace Taller_Mecanico_Users.Domain.Common
 
         public const string UsuarioLoginNotFound = "USUARIO_LOGIN_NOT_FOUND";
         public const string UsuarioEmailDuplicado = "USUARIO_EMAIL_DUPLICADO";
-        public const string UsuarioEmpleadoDuplicado = "USUARIO_EMPLEADO_DUPLICADO";
 
         public const string EmailNotConfigured = "EMAIL_NOT_CONFIGURED";
         public const string EmailSendFailed = "EMAIL_SEND_FAILED";

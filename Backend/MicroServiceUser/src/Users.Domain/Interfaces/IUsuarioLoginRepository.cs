@@ -10,8 +10,6 @@ namespace Taller_Mecanico_Users.Domain.Interfaces
         Task<IEnumerable<UsuarioLogin>> GetAllAsync();
         Task<UsuarioLogin?> GetByEmailAsync(string email);
         Task<Result<UsuarioLogin?>> GetByIdAsync(int id);
-        Task<UsuarioLogin?> GetByEmpleadoIdAsync(int empleadoId);
-        Task<UsuarioLogin?> GetByClienteIdAsync(int clienteId);
         Task<Result> AddAsync(UsuarioLogin entity);
         Task<Result> UpdateAsync(UsuarioLogin entity);
         Task<Result> DeleteAsync(int id);

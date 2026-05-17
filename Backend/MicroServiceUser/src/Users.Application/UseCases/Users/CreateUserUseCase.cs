@@ -20,7 +20,6 @@ namespace Taller_Mecanico_Users.Application.UseCases.Users
     public class CreateUserUseCase
     {
         private readonly IUsuarioLoginRepository _repository;
-        private readonly IEmpleadoRepository _empleadoRepository;
         private readonly Domain.Interfaces.IMailSender _mailSender;
         private readonly Domain.Interfaces.IPasswordSecurity _passwordSecurity;
         private readonly Domain.Interfaces.IPasswordHasher _passwordHasher;
@@ -29,7 +28,6 @@ namespace Taller_Mecanico_Users.Application.UseCases.Users
 
         public CreateUserUseCase(
             IUsuarioLoginRepository repository,
-            IEmpleadoRepository empleadoRepository,
             Domain.Interfaces.IMailSender mailSender,
             Domain.Interfaces.IPasswordSecurity passwordSecurity,
             Domain.Interfaces.IPasswordHasher passwordHasher,
@@ -37,7 +35,6 @@ namespace Taller_Mecanico_Users.Application.UseCases.Users
             IAuthenticationHelper authHelper)
         {
             _repository = repository;
-            _empleadoRepository = empleadoRepository;
             _mailSender = mailSender;
             _passwordSecurity = passwordSecurity;
             _passwordHasher = passwordHasher;
@@ -45,36 +42,12 @@ namespace Taller_Mecanico_Users.Application.UseCases.Users
             _authHelper = authHelper;
         }
 
-        public async Task<Result<UserCreationResult>> ExecuteAsync(int empleadoId, string email, string? plainPasswordProvided = null)
+        public async Task<Result<UserCreationResult>> ExecuteAsync(string email, string? plainPasswordProvided = null)
         {
-            var empleado = await _empleadoRepository.GetByIdAsync(empleadoId);
-            if (empleado is null)
-            {
-                return Result<UserCreationResult>.Failure(ErrorCodes.EmpleadoNotFound, "El empleado no existe.");
-            }
-
-            if (string.IsNullOrWhiteSpace(empleado.Email))
-            {
-                return Result<UserCreationResult>.Failure(ErrorCodes.ValidationAdminEmailRequired, "El empleado seleccionado no tiene un correo configurado.");
-            }
-
             var loginEmail = email.Trim();
             if (!IsValidEmail(loginEmail))
             {
                 return Result<UserCreationResult>.Failure(ErrorCodes.ValidationInvalidValue, "El correo del usuario no es válido.");
-            }
-
-            var empleadoEmail = empleado.Email.Trim();
-            if (!IsValidEmail(empleadoEmail))
-            {
-                return Result<UserCreationResult>.Failure(ErrorCodes.ValidationInvalidValue, "El correo del empleado no es válido.");
-            }
-
-            // 0. Validar que el empleado no tenga ya un login
-            var existingByEmployee = await _repository.GetByEmpleadoIdAsync(empleadoId);
-            if (existingByEmployee != null)
-            {
-                return Result<UserCreationResult>.Failure(ErrorCodes.UsuarioEmpleadoDuplicado, "El empleado ya tiene un usuario asignado.");
             }
 
             // 0. Validar email duplicado
@@ -93,7 +66,7 @@ namespace Taller_Mecanico_Users.Application.UseCases.Users
             string passwordHash = _passwordHasher.HashPassword(plainPassword);
 
             // 3. Crear entidad forzando cambio de contraseña en primer acceso
-            var nuevoUsuarioResult = UsuarioLogin.Crear(empleadoId, loginEmail, passwordHash, requiereCambioPassword: true);
+            var nuevoUsuarioResult = UsuarioLogin.Crear(loginEmail, passwordHash, requiereCambioPassword: true);
             if (nuevoUsuarioResult.IsFailure)
             {
                 return Result<UserCreationResult>.Failure(nuevoUsuarioResult.ErrorCode!, nuevoUsuarioResult.ErrorMessage!);
@@ -148,7 +121,7 @@ namespace Taller_Mecanico_Users.Application.UseCases.Users
     </div>
 </body>
 </html>";
-            var recipients = BuildRecipients(empleadoEmail, loginEmail);
+            var recipients = BuildRecipients(loginEmail);
             try
             {
                 foreach (var recipient in recipients)
@@ -158,7 +131,7 @@ namespace Taller_Mecanico_Users.Application.UseCases.Users
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "No se pudo enviar el correo de bienvenida. EmpleadoId={EmpleadoId} Destinatarios={Recipients}", empleadoId, string.Join(", ", recipients));
+                _logger.LogError(ex, "No se pudo enviar el correo de bienvenida. Destinatarios={Recipients}", string.Join(", ", recipients));
             }
 
             return Result<UserCreationResult>.Success(new UserCreationResult
@@ -182,14 +155,12 @@ namespace Taller_Mecanico_Users.Application.UseCases.Users
             }
         }
 
-        private static IReadOnlyList<string> BuildRecipients(string empleadoEmail, string loginEmail)
+        private static IReadOnlyList<string> BuildRecipients(string loginEmail)
         {
             var recipients = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
-                empleadoEmail
+                loginEmail
             };
-
-            recipients.Add(loginEmail);
             return recipients.ToList();
         }
     }

@@ -6,14 +6,13 @@ namespace Taller_Mecanico_Users.Domain.Entities
     public class UsuarioLogin
     {
         public int UsuarioLoginId { get; private set; }
-        public int? EmpleadoId { get; private set; }
-        public int? ClienteId { get; private set; }
+        
         public string Email { get; private set; } = string.Empty;
         public string PasswordHash { get; private set; } = string.Empty;
         public DateTime? UltimoAcceso { get; private set; }
         public bool Activo { get; private set; }
         public bool RequiereCambioPassword { get; private set; }
-        public bool EsCliente { get; private set; }
+        
         public string? NivelAcceso { get; private set; }
         public string? CreadoPor { get; private set; }
         public string? ActualizadoPor { get; private set; }
@@ -24,74 +23,33 @@ namespace Taller_Mecanico_Users.Domain.Entities
 
         private UsuarioLogin() { }
 
-        public static Result<UsuarioLogin> Crear(int empleadoId, string email, string passwordHash, bool requiereCambioPassword = true)
+        public static Result<UsuarioLogin> Crear(string email, string passwordHash, bool requiereCambioPassword = true)
         {
             return CreateInternal(
-                empleadoId: empleadoId,
-                clienteId: null,
                 email: email,
                 passwordHash: passwordHash,
                 activo: true,
                 requiereCambioPassword: requiereCambioPassword,
-                esCliente: false,
                 ultimoAcceso: null,
                 usuarioLoginId: 0);
         }
 
-        public static Result<UsuarioLogin> CrearParaCliente(int clienteId, string email, string passwordHash)
+        public static Result<UsuarioLogin> Reconstituir(int usuarioLoginId, string email, string passwordHash, DateTime? ultimoAcceso, bool activo, bool requiereCambioPassword = false, string? nivelAcceso = null, string? creadoPor = null, string? actualizadoPor = null, DateTime? fechaActualizacion = null, string? inactivadoPor = null)
         {
             return CreateInternal(
-                empleadoId: null,
-                clienteId: clienteId,
-                email: email,
-                passwordHash: passwordHash,
-                activo: true,
-                requiereCambioPassword: true,
-                esCliente: true,
-                ultimoAcceso: null,
-                usuarioLoginId: 0);
-        }
-
-        public static Result<UsuarioLogin> Reconstituir(int usuarioLoginId, int? empleadoId, int? clienteId, string email, string passwordHash, DateTime? ultimoAcceso, bool activo, bool requiereCambioPassword = false, bool esCliente = false, string? nivelAcceso = null, string? creadoPor = null, string? actualizadoPor = null, DateTime? fechaActualizacion = null, string? inactivadoPor = null)
-        {
-            return CreateInternal(
-                empleadoId: empleadoId,
-                clienteId: clienteId,
                 email: email,
                 passwordHash: passwordHash,
                 activo: activo,
                 requiereCambioPassword: requiereCambioPassword,
-                esCliente: esCliente,
                 ultimoAcceso: ultimoAcceso,
                 usuarioLoginId: usuarioLoginId,
                 nivelAcceso: nivelAcceso,
-                creadoPor: null,
-                actualizadoPor: null,
-                fechaActualizacion: null,
-                inactivadoPor: null,
+                creadoPor: creadoPor,
+                actualizadoPor: actualizadoPor,
+                fechaActualizacion: fechaActualizacion,
+                inactivadoPor: inactivadoPor,
                 rolId: null,
                 rol: null);
-        }
-
-        public static Result<UsuarioLogin> Reconstituir(int usuarioLoginId, int? empleadoId, int? clienteId, string email, string passwordHash, DateTime? ultimoAcceso, bool activo, bool requiereCambioPassword, bool esCliente, string? nivelAcceso, string? creadoPor, string? actualizadoPor, DateTime? fechaActualizacion, string? inactivadoPor, int? rolId, Rol? rol)
-        {
-            return CreateInternal(
-                empleadoId: empleadoId,
-                clienteId: clienteId,
-                email: email,
-                passwordHash: passwordHash,
-                activo: activo,
-                requiereCambioPassword: requiereCambioPassword,
-                esCliente: esCliente,
-                ultimoAcceso: ultimoAcceso,
-                usuarioLoginId: usuarioLoginId,
-                nivelAcceso: nivelAcceso,
-                creadoPor: null,
-                actualizadoPor: null,
-                fechaActualizacion: null,
-                inactivadoPor: null,
-                rolId: rolId,
-                rol: rol);
         }
 
         public Result RegistrarAcceso()
@@ -213,13 +171,10 @@ namespace Taller_Mecanico_Users.Domain.Entities
         }
 
         private static Result<UsuarioLogin> CreateInternal(
-            int? empleadoId,
-            int? clienteId,
             string email,
             string passwordHash,
             bool activo,
             bool requiereCambioPassword,
-            bool esCliente,
             DateTime? ultimoAcceso,
             int usuarioLoginId,
             string? nivelAcceso = null,
@@ -241,30 +196,7 @@ namespace Taller_Mecanico_Users.Domain.Entities
                 return Result<UsuarioLogin>.Failure(ErrorCodes.ValidationRequired, "El hash de contraseña es obligatorio.");
             }
 
-            if (esCliente)
-            {
-                if (!clienteId.HasValue || clienteId.Value <= 0)
-                {
-                    return Result<UsuarioLogin>.Failure(ErrorCodes.ValidationInvalidValue, "El ClienteId es obligatorio para usuarios cliente.");
-                }
-
-                if (empleadoId.HasValue)
-                {
-                    return Result<UsuarioLogin>.Failure(ErrorCodes.ValidationInvalidValue, "Un usuario cliente no puede tener EmpleadoId.");
-                }
-            }
-            else
-            {
-                if (!empleadoId.HasValue || empleadoId.Value <= 0)
-                {
-                    return Result<UsuarioLogin>.Failure(ErrorCodes.ValidationInvalidValue, "El EmpleadoId es obligatorio para usuarios empleado.");
-                }
-
-                if (clienteId.HasValue)
-                {
-                    return Result<UsuarioLogin>.Failure(ErrorCodes.ValidationInvalidValue, "Un usuario empleado no puede tener ClienteId.");
-                }
-            }
+            // No hay distinción de cliente/interno en este servicio de identidad.
 
             if (usuarioLoginId < 0)
             {
@@ -274,14 +206,11 @@ namespace Taller_Mecanico_Users.Domain.Entities
             return Result<UsuarioLogin>.Success(new UsuarioLogin
             {
                 UsuarioLoginId = usuarioLoginId,
-                EmpleadoId = empleadoId,
-                ClienteId = clienteId,
                 Email = normalizedEmailResult.Value!,
                 PasswordHash = passwordHash.Trim(),
                 UltimoAcceso = ultimoAcceso,
                 Activo = activo,
                 RequiereCambioPassword = requiereCambioPassword,
-                EsCliente = esCliente,
                 NivelAcceso = nivelAcceso,
                 CreadoPor = creadoPor,
                 ActualizadoPor = actualizadoPor,

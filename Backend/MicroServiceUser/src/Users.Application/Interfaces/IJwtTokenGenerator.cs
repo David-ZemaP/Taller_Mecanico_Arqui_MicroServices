@@ -11,7 +11,7 @@ namespace Taller_Mecanico_Users.Application.Interfaces
     {
         /// <summary>
         /// Genera un JWT token para un usuario autenticado.
-        /// Claims incluyen: ID, Email, Rol, EmpleadoId/ClienteId, RequiereCambioPassword
+        /// Claims incluyen: ID, Email, Rol, RequiereCambioPassword
         /// </summary>
         string GenerateToken(UsuarioLogin usuario);
     }
