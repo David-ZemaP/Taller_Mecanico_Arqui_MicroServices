@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # MySQL para Microservicio de Productos
+  mysql-productos:
+    image: mysql:8.0
+    container_name: taller-mysql-productos
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: productos_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-productos-data:/var/lib/mysql
+      - ./MicroServiceProduct/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL para Microservicio de Servicios
+  postgresql-servicios:
+    image: postgres:15
+    container_name: taller-postgresql-servicios
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: servicios_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgresql-servicios-data:/var/lib/postgresql/data
+      - ./MicroServiceService/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL para Microservicio de Usuarios
+  postgresql-usuarios:
+    image: postgres:15
+    container_name: taller-postgresql-usuarios
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: usuarios_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgresql-usuarios-data:/var/lib/postgresql/data
+      - ./MicroServiceUser/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql-productos-data:
+  postgresql-servicios-data:
+  postgresql-usuarios-data:

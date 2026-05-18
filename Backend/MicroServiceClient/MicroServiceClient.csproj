@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FirebaseAdmin" Version="2.4.0" />
+    <PackageReference Include="Google.Cloud.Firestore" Version="3.4.0" />
+    <PackageReference Include="Google.Apis.FirebaseManagementV1" Version="1.68.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
   </ItemGroup>
 

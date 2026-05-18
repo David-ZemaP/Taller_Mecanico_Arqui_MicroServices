@@ -1,0 +1,5 @@
+-- =============================================
+-- Inicialización Base de Datos Usuarios (PostgreSQL)
+-- =============================================
+-- Aquí van los scripts de creación de tablas
+-- cuando tengas el detalle de la estructura
