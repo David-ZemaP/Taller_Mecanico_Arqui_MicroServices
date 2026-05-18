@@ -5,6 +5,8 @@ namespace Taller_Mecanico_Users.Domain.Enums
         Parcial,
         Completo,
         Gerente,
+        Administrador,
+        Mecanico,
         Cliente
     }
 }

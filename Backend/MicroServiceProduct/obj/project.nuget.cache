@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "d3fqxGcoRIw=",
+  "dgSpecHash": "ecCgJS7ESqU=",
   "success": true,
-  "projectFilePath": "C:\\Users\\skt1f\\Documents\\Cato\\2026\\2026-I\\ARQUI\\Taller_Mecanico_Arqui_MicroServices\\Backend\\MicroServiceProduct\\MicroServiceProduct.csproj",
+  "projectFilePath": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceProduct/MicroServiceProduct.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\skt1f\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.2\\microsoft.aspnetcore.openapi.10.0.2.nupkg.sha512",
-    "C:\\Users\\skt1f\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512"
+    "/home/Pololi15/.nuget/packages/microsoft.aspnetcore.openapi/10.0.2/microsoft.aspnetcore.openapi.10.0.2.nupkg.sha512",
+    "/home/Pololi15/.nuget/packages/microsoft.openapi/2.0.0/microsoft.openapi.2.0.0.nupkg.sha512"
   ],
   "logs": []
 }

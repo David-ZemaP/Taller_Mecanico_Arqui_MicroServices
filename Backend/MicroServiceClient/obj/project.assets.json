@@ -1,106 +1,37 @@
 {
   "version": 3,
   "targets": {
-    "net10.0": {
-      "Microsoft.AspNetCore.OpenApi/10.0.2": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.OpenApi": "2.0.0"
-        },
-        "compile": {
-          "lib/net10.0/Microsoft.AspNetCore.OpenApi.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0/Microsoft.AspNetCore.OpenApi.dll": {
-            "related": ".xml"
-          }
-        },
-        "frameworkReferences": [
-          "Microsoft.AspNetCore.App"
-        ],
-        "build": {
-          "build/Microsoft.AspNetCore.OpenApi.targets": {}
-        }
-      },
-      "Microsoft.OpenApi/2.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net8.0/Microsoft.OpenApi.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net8.0/Microsoft.OpenApi.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      }
-    }
+    "net10.0": {}
   },
-  "libraries": {
-    "Microsoft.AspNetCore.OpenApi/10.0.2": {
-      "sha512": "YuEjUNpsoZLs0I5ONt013Z+Udsz3f9sPUh1Xm59LN7+/Z8oVG/swCUYLBbANtfreiunWnoT2uk+5kst4s2jr3Q==",
-      "type": "package",
-      "path": "microsoft.aspnetcore.openapi/10.0.2",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "PACKAGE.md",
-        "THIRD-PARTY-NOTICES.TXT",
-        "analyzers/dotnet/cs/Microsoft.AspNetCore.OpenApi.SourceGenerators.dll",
-        "build/Microsoft.AspNetCore.OpenApi.targets",
-        "lib/net10.0/Microsoft.AspNetCore.OpenApi.dll",
-        "lib/net10.0/Microsoft.AspNetCore.OpenApi.xml",
-        "microsoft.aspnetcore.openapi.10.0.2.nupkg.sha512",
-        "microsoft.aspnetcore.openapi.nuspec"
-      ]
-    },
-    "Microsoft.OpenApi/2.0.0": {
-      "sha512": "GGYLfzV/G/ct80OZ45JxnWP7NvMX1BCugn/lX7TH5o0lcVaviavsLMTxmFV2AybXWjbi3h6FF1vgZiTK6PXndw==",
-      "type": "package",
-      "path": "microsoft.openapi/2.0.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "README.md",
-        "lib/net8.0/Microsoft.OpenApi.dll",
-        "lib/net8.0/Microsoft.OpenApi.pdb",
-        "lib/net8.0/Microsoft.OpenApi.xml",
-        "lib/netstandard2.0/Microsoft.OpenApi.dll",
-        "lib/netstandard2.0/Microsoft.OpenApi.pdb",
-        "lib/netstandard2.0/Microsoft.OpenApi.xml",
-        "microsoft.openapi.2.0.0.nupkg.sha512",
-        "microsoft.openapi.nuspec"
-      ]
-    }
-  },
+  "libraries": {},
   "projectFileDependencyGroups": {
     "net10.0": [
+      "FirebaseAdmin >= 2.4.0",
+      "Google.Apis.FirebaseManagementV1 >= 1.68.0",
+      "Google.Cloud.Firestore >= 3.4.0",
       "Microsoft.AspNetCore.OpenApi >= 10.0.2"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\skt1f\\.nuget\\packages\\": {}
+    "/home/Pololi15/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\skt1f\\Documents\\Cato\\2026\\2026-I\\ARQUI\\Taller_Mecanico_Arqui_MicroServices\\Backend\\MicroServiceClient\\MicroServiceClient.csproj",
+      "projectUniqueName": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceClient/MicroServiceClient.csproj",
       "projectName": "MicroServiceClient",
-      "projectPath": "C:\\Users\\skt1f\\Documents\\Cato\\2026\\2026-I\\ARQUI\\Taller_Mecanico_Arqui_MicroServices\\Backend\\MicroServiceClient\\MicroServiceClient.csproj",
-      "packagesPath": "C:\\Users\\skt1f\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\skt1f\\Documents\\Cato\\2026\\2026-I\\ARQUI\\Taller_Mecanico_Arqui_MicroServices\\Backend\\MicroServiceClient\\obj\\",
+      "projectPath": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceClient/MicroServiceClient.csproj",
+      "packagesPath": "/home/Pololi15/.nuget/packages/",
+      "outputPath": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceClient/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\skt1f\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "/home/Pololi15/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
       ],
       "sources": {
+        "/usr/lib64/dotnet/library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -125,6 +56,18 @@
       "net10.0": {
         "targetAlias": "net10.0",
         "dependencies": {
+          "FirebaseAdmin": {
+            "target": "Package",
+            "version": "[2.4.0, )"
+          },
+          "Google.Apis.FirebaseManagementV1": {
+            "target": "Package",
+            "version": "[1.68.0, )"
+          },
+          "Google.Cloud.Firestore": {
+            "target": "Package",
+            "version": "[3.4.0, )"
+          },
           "Microsoft.AspNetCore.OpenApi": {
             "target": "Package",
             "version": "[10.0.2, )"
@@ -149,7 +92,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/10.0.107/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
@@ -566,5 +509,12 @@
         }
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Unable to load the service index for source https://api.nuget.org/v3/index.json.\n  Resource temporarily unavailable (api.nuget.org:443)\n  Resource temporarily unavailable"
+    }
+  ]
 }

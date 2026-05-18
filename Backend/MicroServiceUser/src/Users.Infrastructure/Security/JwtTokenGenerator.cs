@@ -46,6 +46,12 @@ namespace Taller_Mecanico_Users.Infrastructure.Security
                 claims.Add(new Claim("RolId", usuario.RolId.Value.ToString()));
             }
 
+            // Añadir claim de rol para que la autorización basada en Roles funcione (Authorize(Roles = "...")).
+            if (!string.IsNullOrWhiteSpace(usuario.Rol?.Nombre))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, usuario.Rol.Nombre));
+            }
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),

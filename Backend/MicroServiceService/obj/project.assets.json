@@ -83,24 +83,25 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\skt1f\\.nuget\\packages\\": {}
+    "/home/Pololi15/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\skt1f\\Documents\\Cato\\2026\\2026-I\\ARQUI\\Taller_Mecanico_Arqui_MicroServices\\Backend\\MicroServiceService\\MicroServiceService.csproj",
+      "projectUniqueName": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceService/MicroServiceService.csproj",
       "projectName": "MicroServiceService",
-      "projectPath": "C:\\Users\\skt1f\\Documents\\Cato\\2026\\2026-I\\ARQUI\\Taller_Mecanico_Arqui_MicroServices\\Backend\\MicroServiceService\\MicroServiceService.csproj",
-      "packagesPath": "C:\\Users\\skt1f\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\skt1f\\Documents\\Cato\\2026\\2026-I\\ARQUI\\Taller_Mecanico_Arqui_MicroServices\\Backend\\MicroServiceService\\obj\\",
+      "projectPath": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceService/MicroServiceService.csproj",
+      "packagesPath": "/home/Pololi15/.nuget/packages/",
+      "outputPath": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceService/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\skt1f\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "/home/Pololi15/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
       ],
       "sources": {
+        "/usr/lib64/dotnet/library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -149,7 +150,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/10.0.107/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
