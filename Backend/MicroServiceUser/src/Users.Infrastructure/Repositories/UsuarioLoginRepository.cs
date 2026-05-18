@@ -193,20 +193,6 @@ namespace Taller_Mecanico_Users.Infrastructure.Repositories
             return null;
         }
 
-        public async Task<UsuarioLogin?> GetByEmpleadoIdAsync(int empleadoId)
-        {
-            // Este microservicio no maneja EmpleadoId directamente.
-            // Solo autentica usuarios por email y asigna rol.
-            return null;
-        }
-
-        public async Task<UsuarioLogin?> GetByClienteIdAsync(int clienteId)
-        {
-            // Este microservicio no maneja ClienteId directamente.
-            // Solo autentica usuarios por email y asigna rol.
-            return null;
-        }
-
         public async Task<Result> DeleteAsync(int id)
         {
             await using var connection = _connectionFactory.CreateConnection();

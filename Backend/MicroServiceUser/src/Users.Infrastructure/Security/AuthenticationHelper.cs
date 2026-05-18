@@ -34,43 +34,12 @@ public class AuthenticationHelper : IAuthenticationHelper
         return null;
     }
 
-    public int? GetCurrentUserEmployeeId()
-    {
-        var httpContext = _httpContextAccessor.HttpContext;
-        if (httpContext?.User?.Identity?.IsAuthenticated != true)
-        {
-            return null;
-        }
-
-        var employeeIdClaim = httpContext.User.FindFirst("EmpleadoId")?.Value
-            ?? httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (!string.IsNullOrWhiteSpace(employeeIdClaim) && int.TryParse(employeeIdClaim, out var employeeId))
-        {
-            return employeeId;
-        }
-
-        return null;
-    }
-
     public string GetCurrentAuditActor()
     {
         var httpContext = _httpContextAccessor.HttpContext;
         if (httpContext?.User?.Identity?.IsAuthenticated != true)
         {
             return "sistema";
-        }
-
-        var employeeIdClaim = httpContext.User.FindFirst("EmpleadoId")?.Value;
-        if (!string.IsNullOrWhiteSpace(employeeIdClaim))
-        {
-            return employeeIdClaim;
-        }
-
-        var clientIdClaim = httpContext.User.FindFirst("ClienteId")?.Value;
-        if (!string.IsNullOrWhiteSpace(clientIdClaim))
-        {
-            return clientIdClaim;
         }
 
         var emailClaim = httpContext.User.FindFirst(ClaimTypes.Email)?.Value;
@@ -85,9 +54,7 @@ public class AuthenticationHelper : IAuthenticationHelper
 
     public async Task ForceLogoutAsync()
     {
-        // Con JWT Bearer no es posible invalidar el token del cliente desde el servidor
-        // sin un mecanismo de revocación. Aquí hacemos una operación no destructiva
-        // y registramos la intención para que el caller la maneje si tiene revocación.
+        // Con JWT Bearer no es posible invalidar el token desde el servidor sin revocación.
         _logger.LogWarning("ForceLogoutAsync called but JWT bearer is used; no server-side logout performed.");
         await Task.CompletedTask;
     }

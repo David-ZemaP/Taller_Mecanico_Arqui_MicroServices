@@ -196,8 +196,6 @@ namespace Taller_Mecanico_Users.Domain.Entities
                 return Result<UsuarioLogin>.Failure(ErrorCodes.ValidationRequired, "El hash de contraseña es obligatorio.");
             }
 
-            // No hay distinción de cliente/interno en este servicio de identidad.
-
             if (usuarioLoginId < 0)
             {
                 return Result<UsuarioLogin>.Failure(ErrorCodes.ValidationInvalidValue, "El identificador del usuario no es válido.");
