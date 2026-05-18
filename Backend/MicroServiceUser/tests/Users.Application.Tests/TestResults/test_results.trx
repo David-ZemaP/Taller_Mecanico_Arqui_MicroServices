@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="5ee048f4-3c2b-45b9-9c27-66f0058f0878" name="@fedora 2026-05-17 01:34:03" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-05-17T01:34:03.3471635-04:00" queuing="2026-05-17T01:34:03.3471636-04:00" start="2026-05-17T01:34:02.3173917-04:00" finish="2026-05-17T01:34:03.3537212-04:00" />
+  <TestSettings name="default" id="b29bc477-5f24-452f-ba22-0879b6773d3e">
+    <Deployment runDeploymentRoot="_fedora_2026-05-17_01_34_03" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="0a882482-e5b7-4bc0-9fee-144e9212d519" testId="baa2e908-0ec9-6e39-bb4a-18b6e3c9b01a" testName="Taller_Mecanico_Users.Tests.CreateUserUseCaseTests.CreateUser_CreatesUserAndReturnsPassword" computerName="fedora" duration="00:00:00.0073546" startTime="2026-05-17T01:34:03.2007158-04:00" endTime="2026-05-17T01:34:03.2007546-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0a882482-e5b7-4bc0-9fee-144e9212d519" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Taller_Mecanico_Users.Tests.CreateUserUseCaseTests.CreateUser_CreatesUserAndReturnsPassword" storage="/home/pololi15/documentos/universidad/7_semestre/arquitectura_de_software/codigos_docente/3eracompetencia/taller_mecanico_arqui_microservices/backend/microserviceuser/tests/users.application.tests/bin/debug/net10.0/users.application.tests.dll" id="baa2e908-0ec9-6e39-bb4a-18b6e3c9b01a">
+      <Execution id="0a882482-e5b7-4bc0-9fee-144e9212d519" />
+      <TestMethod codeBase="/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/tests/Users.Application.Tests/bin/Debug/net10.0/Users.Application.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Taller_Mecanico_Users.Tests.CreateUserUseCaseTests" name="CreateUser_CreatesUserAndReturnsPassword" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="baa2e908-0ec9-6e39-bb4a-18b6e3c9b01a" executionId="0a882482-e5b7-4bc0-9fee-144e9212d519" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Resultados sin formato de lista" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="Todos los resultados cargados" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="1" executed="1" passed="1" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.4.3+1b45f5407b (64-bit .NET 10.0.7)
+[xUnit.net 00:00:00.37]   Discovering: Users.Application.Tests
+[xUnit.net 00:00:00.40]   Discovered:  Users.Application.Tests
+[xUnit.net 00:00:00.40]   Starting:    Users.Application.Tests
+[xUnit.net 00:00:00.46]   Finished:    Users.Application.Tests
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>
