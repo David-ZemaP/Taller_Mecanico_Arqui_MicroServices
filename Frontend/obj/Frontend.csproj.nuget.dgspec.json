@@ -1,26 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Frontend/Frontend.csproj": {}
+    "/home/robert/Documents/Arquitectura de Software/Taller_Mecanico_Arqui_MicroServices/Frontend/Frontend.csproj": {}
   },
   "projects": {
-    "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Frontend/Frontend.csproj": {
+    "/home/robert/Documents/Arquitectura de Software/Taller_Mecanico_Arqui_MicroServices/Frontend/Frontend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Frontend/Frontend.csproj",
+        "projectUniqueName": "/home/robert/Documents/Arquitectura de Software/Taller_Mecanico_Arqui_MicroServices/Frontend/Frontend.csproj",
         "projectName": "Frontend",
-        "projectPath": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Frontend/Frontend.csproj",
-        "packagesPath": "/home/Pololi15/.nuget/packages/",
-        "outputPath": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Frontend/obj/",
+        "projectPath": "/home/robert/Documents/Arquitectura de Software/Taller_Mecanico_Arqui_MicroServices/Frontend/Frontend.csproj",
+        "packagesPath": "/home/robert/.nuget/packages/",
+        "outputPath": "/home/robert/Documents/Arquitectura de Software/Taller_Mecanico_Arqui_MicroServices/Frontend/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/Pololi15/.nuget/NuGet/NuGet.Config"
+          "/home/robert/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "/usr/lib64/dotnet/library-packs": {},
+          "/usr/lib/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -44,6 +44,32 @@
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
+          "dependencies": {
+            "ClosedXML": {
+              "target": "Package",
+              "version": "[0.102.3, )"
+            },
+            "Microsoft.AspNetCore.Authentication.OpenIdConnect": {
+              "target": "Package",
+              "version": "[10.0.2, )"
+            },
+            "Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation": {
+              "target": "Package",
+              "version": "[10.0.2, )"
+            },
+            "Microsoft.Identity.Web": {
+              "target": "Package",
+              "version": "[2.21.0, )"
+            },
+            "Microsoft.Identity.Web.MicrosoftGraph": {
+              "target": "Package",
+              "version": "[2.21.0, )"
+            },
+            "System.Net.Http": {
+              "target": "Package",
+              "version": "[4.3.4, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -63,7 +89,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/10.0.107/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/10.0.107/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
