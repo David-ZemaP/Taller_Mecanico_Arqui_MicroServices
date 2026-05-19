@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # MySQL para Microservicio de Productos
   mysql-productos:
@@ -12,7 +10,7 @@ services:
       - "3306:3306"
     volumes:
       - mysql-productos-data:/var/lib/mysql
-      - ./MicroServiceProduct/init:/docker-entrypoint-initdb.d
+      - ./MicroServiceProduct/init:/docker-entrypoint-initdb.d:Z
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -31,7 +29,7 @@ services:
       - "5432:5432"
     volumes:
       - postgresql-servicios-data:/var/lib/postgresql/data
-      - ./MicroServiceService/init:/docker-entrypoint-initdb.d
+      - ./MicroServiceService/init:/docker-entrypoint-initdb.d:Z
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -50,12 +48,39 @@ services:
       - "5433:5432"
     volumes:
       - postgresql-usuarios-data:/var/lib/postgresql/data
-      - ./MicroServiceUser/init:/docker-entrypoint-initdb.d
+      - ./MicroServiceUser/init:/docker-entrypoint-initdb.d:Z
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # API del microservicio de usuarios
+  users-api:
+    build:
+      context: ./MicroServiceUser/src
+      dockerfile: Users.API/Dockerfile
+    container_name: taller-users-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Host=postgresql-usuarios;Port=5432;Database=usuarios_db;Username=postgres;Password=postgres
+      JwtSettings__Secret: dev-secret-change-me-please-1234567890-abcdef
+      JwtSettings__Issuer: Taller_Mecanico
+      JwtSettings__Audience: Taller_Mecanico_Clients
+      JwtSettings__ExpirationInMinutes: "60"
+      SMTP_ENABLED: "true"
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: "587"
+      SMTP_USERNAME: ostinrivas15@gmail.com
+      SMTP_PASSWORD: "xsdm rlqw iygv nvwd"
+      SMTP_FROM: ostinrivas15@gmail.com
+      SMTP_ENABLESSL: "true"
+      SMTP_TIMEOUTMS: "100000"
+    ports:
+      - "5004:8080"
+    depends_on:
+      postgresql-usuarios:
+        condition: service_healthy
 
 volumes:
   mysql-productos-data:
