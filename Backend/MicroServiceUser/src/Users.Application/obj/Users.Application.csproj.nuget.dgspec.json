@@ -1,34 +1,39 @@
 {
   "format": 1,
   "restore": {
-    "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/src/Users.Application/Users.Application.csproj": {}
+    "C:\\Users\\Mateo\\.gemini\\antigravity\\worktrees\\Backend\\migrate-customers-firebase-clean\\Backend\\MicroServiceUser\\src\\Users.Application\\Users.Application.csproj": {}
   },
   "projects": {
-    "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/src/Users.Application/Users.Application.csproj": {
+    "C:\\Users\\Mateo\\.gemini\\antigravity\\worktrees\\Backend\\migrate-customers-firebase-clean\\Backend\\MicroServiceUser\\src\\Users.Application\\Users.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/src/Users.Application/Users.Application.csproj",
+        "projectUniqueName": "C:\\Users\\Mateo\\.gemini\\antigravity\\worktrees\\Backend\\migrate-customers-firebase-clean\\Backend\\MicroServiceUser\\src\\Users.Application\\Users.Application.csproj",
         "projectName": "Users.Application",
-        "projectPath": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/src/Users.Application/Users.Application.csproj",
-        "packagesPath": "/home/Pololi15/.nuget/packages/",
-        "outputPath": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/src/Users.Application/obj/",
+        "projectPath": "C:\\Users\\Mateo\\.gemini\\antigravity\\worktrees\\Backend\\migrate-customers-firebase-clean\\Backend\\MicroServiceUser\\src\\Users.Application\\Users.Application.csproj",
+        "packagesPath": "C:\\Users\\Mateo\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Mateo\\.gemini\\antigravity\\worktrees\\Backend\\migrate-customers-firebase-clean\\Backend\\MicroServiceUser\\src\\Users.Application\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/home/Pololi15/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\Mateo\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "/usr/lib64/dotnet/library-packs": {},
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/src/Users.Domain/Users.Domain.csproj": {
-                "projectPath": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/src/Users.Domain/Users.Domain.csproj"
+              "C:\\Users\\Mateo\\.gemini\\antigravity\\worktrees\\Backend\\migrate-customers-firebase-clean\\Backend\\MicroServiceUser\\src\\Users.Domain\\Users.Domain.csproj": {
+                "projectPath": "C:\\Users\\Mateo\\.gemini\\antigravity\\worktrees\\Backend\\migrate-customers-firebase-clean\\Backend\\MicroServiceUser\\src\\Users.Domain\\Users.Domain.csproj"
               }
             }
           }
@@ -43,7 +48,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net10.0": {
@@ -70,7 +75,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/10.0.107/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -348,23 +353,28 @@
         }
       }
     },
-    "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/src/Users.Domain/Users.Domain.csproj": {
+    "C:\\Users\\Mateo\\.gemini\\antigravity\\worktrees\\Backend\\migrate-customers-firebase-clean\\Backend\\MicroServiceUser\\src\\Users.Domain\\Users.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/src/Users.Domain/Users.Domain.csproj",
+        "projectUniqueName": "C:\\Users\\Mateo\\.gemini\\antigravity\\worktrees\\Backend\\migrate-customers-firebase-clean\\Backend\\MicroServiceUser\\src\\Users.Domain\\Users.Domain.csproj",
         "projectName": "Users.Domain",
-        "projectPath": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/src/Users.Domain/Users.Domain.csproj",
-        "packagesPath": "/home/Pololi15/.nuget/packages/",
-        "outputPath": "/home/Pololi15/Documentos/Universidad/7_Semestre/ARQUITECTURA_DE_SOFTWARE/codigos_docente/3eraCompetencia/Taller_Mecanico_Arqui_MicroServices/Backend/MicroServiceUser/src/Users.Domain/obj/",
+        "projectPath": "C:\\Users\\Mateo\\.gemini\\antigravity\\worktrees\\Backend\\migrate-customers-firebase-clean\\Backend\\MicroServiceUser\\src\\Users.Domain\\Users.Domain.csproj",
+        "packagesPath": "C:\\Users\\Mateo\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Mateo\\.gemini\\antigravity\\worktrees\\Backend\\migrate-customers-firebase-clean\\Backend\\MicroServiceUser\\src\\Users.Domain\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/home/Pololi15/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\Mateo\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "/usr/lib64/dotnet/library-packs": {},
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -383,7 +393,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net10.0": {
@@ -404,7 +414,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/10.0.107/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
