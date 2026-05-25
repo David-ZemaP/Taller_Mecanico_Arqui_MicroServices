@@ -21,7 +21,8 @@ namespace Taller_Mecanico_Clientes.Infrastructure.Repositories
             try
             {
                 var collection = _firestoreDb.Collection(CollectionName);
-                var snapshot = await collection.GetSnapshotAsync();
+                var query = collection.WhereEqualTo("isDeleted", false);
+                var snapshot = await query.GetSnapshotAsync();
                 
                 var clientes = snapshot.Documents.Select(doc =>
                 {
@@ -48,6 +49,11 @@ namespace Taller_Mecanico_Clientes.Infrastructure.Repositories
                 }
 
                 var docModel = doc.ConvertTo<ClienteDocument>();
+                if (docModel.IsDeleted)
+                {
+                    return Result<Cliente?>.Success(null);
+                }
+
                 return Result<Cliente?>.Success(docModel.ToEntity());
             }
             catch (Exception ex)
@@ -61,7 +67,6 @@ namespace Taller_Mecanico_Clientes.Infrastructure.Repositories
             try
             {
                 var docModel = ClienteDocument.FromEntity(cliente);
-                // Generate new ID if not present
                 var docRef = _firestoreDb.Collection(CollectionName).Document();
                 docModel.Id = docRef.Id;
 
@@ -87,7 +92,16 @@ namespace Taller_Mecanico_Clientes.Infrastructure.Repositories
                     return Result<Cliente>.Failure(ErrorCodes.ClienteNotFound, "El cliente a actualizar no existe.");
                 }
 
+                var docModelExisting = snapshot.ConvertTo<ClienteDocument>();
+                if (docModelExisting.IsDeleted)
+                {
+                    return Result<Cliente>.Failure(ErrorCodes.ClienteNotFound, "El cliente a actualizar ha sido eliminado.");
+                }
+
                 cliente.Id = id;
+                cliente.FechaRegistro = docModelExisting.FechaRegistro; // Preserve original creation date
+                cliente.FechaActualizacion = DateTime.UtcNow;
+
                 var docModel = ClienteDocument.FromEntity(cliente);
                 await docRef.SetAsync(docModel, SetOptions.Overwrite);
 
@@ -110,12 +124,24 @@ namespace Taller_Mecanico_Clientes.Infrastructure.Repositories
                     return Result.Failure(ErrorCodes.ClienteNotFound, "El cliente a eliminar no existe.");
                 }
 
-                await docRef.DeleteAsync();
+                var docModel = snapshot.ConvertTo<ClienteDocument>();
+                if (docModel.IsDeleted)
+                {
+                    return Result.Failure(ErrorCodes.ClienteNotFound, "El cliente ya se encuentra eliminado.");
+                }
+
+                // Perform soft delete
+                var updates = new Dictionary<string, object>
+                {
+                    { "isDeleted", true },
+                    { "fechaActualizacion", DateTime.UtcNow }
+                };
+                await docRef.UpdateAsync(updates);
                 return Result.Success();
             }
             catch (Exception ex)
             {
-                return Result.Failure(ErrorCodes.DbError, $"Error al eliminar cliente: {ex.Message}");
+                return Result.Failure(ErrorCodes.DbError, $"Error al eliminar cliente (soft delete): {ex.Message}");
             }
         }
     }

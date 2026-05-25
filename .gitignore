@@ -1,5 +1,6 @@
 **/.env
-**/bin/**
-**/obj/**
+**/bin/
+**/obj/
+[Bb]in/
+[Oo]bj/
 **/firebase-credentials.json
-
