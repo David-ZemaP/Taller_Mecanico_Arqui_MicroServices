@@ -3,4 +3,57 @@
 **/obj/
 [Bb]in/
 [Oo]bj/
-**/firebase-credentials.json
+**/bin/
+**/obj/
+
+# User secrets and env
+**/.env
+firebase-credentials.json
+
+# Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+publish/
+**/publish/
+
+# NuGet
+*.nupkg
+project.assets.json
+
+# EF Core
+# Migrations should be committed, do NOT ignore the Migrations folder
+
+# Local DB files
+*.db
+*.sqlite
+*.mdf
+*.ldf
+
+# Logs
+*.log
+logs/
+
+# Docker
+docker-compose.override.yml
+**/docker-compose.override.yml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Ignorar artefactos y archivos locales del microservicio MicroServiceProduct
+Backend/MicroServiceProduct/bin/
+Backend/MicroServiceProduct/obj/
+Backend/MicroServiceProduct/publish/
+Backend/MicroServiceProduct/*.db
+Backend/MicroServiceProduct/*.sqlite
+Backend/MicroServiceProduct/*.log
+Backend/MicroServiceProduct/docker-compose.override.yml
+
