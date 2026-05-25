@@ -19,6 +19,10 @@ public class ProductsDbContext : DbContext
             eb.Property(p => p.Description).HasMaxLength(1000);
             eb.Property(p => p.Price).HasColumnType("decimal(18,2)");
             eb.Property(p => p.CreatedAt).IsRequired();
+            eb.Property(p => p.IsDeleted).HasDefaultValue(false);
+            eb.Property(p => p.DeletedAt).IsRequired(false);
+            // Global query filter to hide soft-deleted entities
+            eb.HasQueryFilter(p => !p.IsDeleted);
         });
     }
 }

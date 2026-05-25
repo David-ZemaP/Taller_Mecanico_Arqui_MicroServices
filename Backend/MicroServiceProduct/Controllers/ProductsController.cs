@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MicroServiceProduct.Application.Services;
+using System.ComponentModel.DataAnnotations;
 using MicroServiceProduct.Application.DTOs;
 
 namespace MicroServiceProduct.Controllers;
@@ -8,9 +9,9 @@ namespace MicroServiceProduct.Controllers;
 [Route("api/[controller]")]
 public class ProductsController : ControllerBase
 {
-    private readonly ProductService _svc;
+    private readonly IProductService _svc;
 
-    public ProductsController(ProductService svc)
+    public ProductsController(IProductService svc)
     {
         _svc = svc;
     }
@@ -48,5 +49,12 @@ public class ProductsController : ControllerBase
     }
 }
 
-public record CreateProductRequest(string Name, string? Description, decimal Price);
-public record UpdateProductRequest(string Name, string? Description, decimal Price);
+public record CreateProductRequest(
+    [Required, MaxLength(200)] string Name,
+    [MaxLength(1000)] string? Description,
+    [Range(0, 9999999.99)] decimal Price);
+
+public record UpdateProductRequest(
+    [Required, MaxLength(200)] string Name,
+    [MaxLength(1000)] string? Description,
+    [Range(0, 9999999.99)] decimal Price);

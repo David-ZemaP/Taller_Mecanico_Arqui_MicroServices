@@ -22,17 +22,18 @@ if (!string.IsNullOrEmpty(conn))
 
 // Dependency injection for repository and services
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+// Always map OpenAPI/UI so the Swagger UI is available inside containers.
+app.MapOpenApi();
 
 app.UseHttpsRedirection();
+
+// Serve static files (for the Swagger-like test UI)
+app.UseStaticFiles();
 
 app.UseAuthorization();
 

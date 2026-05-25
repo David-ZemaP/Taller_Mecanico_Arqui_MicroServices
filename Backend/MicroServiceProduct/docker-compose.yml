@@ -20,5 +20,6 @@ services:
         condition: service_healthy
     environment:
       - ConnectionStrings__DefaultConnection=Server=db;Database=products_db;User=root;Password=changeme;
+      - ASPNETCORE_ENVIRONMENT=Development
     ports:
       - "5002:80"

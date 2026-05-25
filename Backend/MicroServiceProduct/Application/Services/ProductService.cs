@@ -4,7 +4,7 @@ using MicroServiceProduct.Application.DTOs;
 
 namespace MicroServiceProduct.Application.Services;
 
-public class ProductService
+public class ProductService : IProductService
 {
     private readonly IProductRepository _repo;
 

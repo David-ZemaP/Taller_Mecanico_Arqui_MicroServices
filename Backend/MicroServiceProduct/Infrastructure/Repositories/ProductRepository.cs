@@ -22,9 +22,12 @@ public class ProductRepository : IProductRepository
 
     public async Task DeleteAsync(Guid id, CancellationToken ct = default)
     {
-        var p = await _db.Products.FindAsync(new object[] { id }, ct);
+        var p = await _db.Products.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (p is null) return;
-        _db.Products.Remove(p);
+        // Soft delete
+        p.IsDeleted = true;
+        p.DeletedAt = DateTime.UtcNow;
+        _db.Products.Update(p);
         await _db.SaveChangesAsync(ct);
     }
 
@@ -35,7 +38,7 @@ public class ProductRepository : IProductRepository
 
     public async Task<Product?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-        return await _db.Products.FindAsync(new object[] { id }, ct);
+        return await _db.Products.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 
     public async Task UpdateAsync(Product product, CancellationToken ct = default)
