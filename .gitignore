@@ -47,6 +47,9 @@ logs/
 docker-compose.override.yml
 **/docker-compose.override.yml
 
+# Test results
+**/TestResults/
+
 # OS files
 .DS_Store
 Thumbs.db
