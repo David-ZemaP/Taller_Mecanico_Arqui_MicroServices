@@ -125,6 +125,7 @@ namespace WebService.Pages.Empleados
 
             bool isNew = FormDto.EmpleadoId == 0;
             string? plainPassword = null;
+            string? createdUserEmail = null;
 
             if (isNew)
             {
@@ -138,7 +139,7 @@ namespace WebService.Pages.Empleados
                 // Crear automáticamente el acceso al sistema si se proporcionó email
                 if (!string.IsNullOrWhiteSpace(FormDto.Email) && empleadoId.HasValue)
                 {
-                    var (userOk, generatedPassword, _, _) = await _adapter.CreateUsuarioAsync(
+                    var (userOk, generatedPassword, generatedEmail, _, _) = await _adapter.CreateUsuarioAsync(
                         empleadoId.Value, FormDto.Email, null);
 
                     if (!userOk)
@@ -149,10 +150,11 @@ namespace WebService.Pages.Empleados
                     else
                     {
                         plainPassword = generatedPassword;
+                        createdUserEmail = generatedEmail;
                         if (!string.IsNullOrWhiteSpace(FormDto.RolNombre))
                         {
                             // Buscar el usuario por empleadoId y luego asignar el rol
-                            var (empUserOk, empUser, _) = await _adapter.GetUsuarioByEmpleadoIdAsync(empleadoId.Value);
+                            var (empUserOk, empUser, _) = await _adapter.GetUsuarioByEmailAsync(createdUserEmail ?? FormDto.Email);
                             if (empUserOk && empUser != null)
                             {
                                 var (rolOk, rolError) = await _adapter.UpdateUsuarioRolAsync(empUser.UsuarioLoginId, FormDto.RolNombre);

@@ -172,6 +172,29 @@ namespace WebService.Adapters
             }
         }
 
+        public async Task<(bool ok, UsuarioDto? usuario, string? error)> GetUsuarioByEmailAsync(string email)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(email))
+                    return (false, null, "Correo de usuario inválido.");
+
+                var (ok, usuarios, error) = await GetAllUsuariosAsync();
+                if (!ok || usuarios == null)
+                    return (false, null, error ?? "No se pudieron obtener los usuarios del backend.");
+
+                var matchedUser = usuarios.FirstOrDefault(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+                if (matchedUser == null)
+                    return (false, null, "No se encontró cuenta de usuario para este correo.");
+
+                return (true, matchedUser, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, null, $"Error al buscar usuario por correo: {ex.Message}");
+            }
+        }
+
         public async Task<(bool ok, UsuarioDto? usuario, string? error)> GetUsuarioByEmpleadoIdAsync(int empleadoId)
         {
             try
@@ -199,7 +222,7 @@ namespace WebService.Adapters
             }
         }
 
-        public async Task<(bool ok, string? plainPassword, IReadOnlyList<string>? notificationRecipients, string? error)> CreateUsuarioAsync(int empleadoId, string email, string? password)
+        public async Task<(bool ok, string? plainPassword, string? createdEmail, IReadOnlyList<string>? notificationRecipients, string? error)> CreateUsuarioAsync(int empleadoId, string email, string? password)
         {
             try
             {
@@ -207,16 +230,19 @@ namespace WebService.Adapters
                 var body = new { email, password };
                 var response = await SendAsync(HttpMethod.Post, "api/users", body);
                 if (!response.IsSuccessStatusCode)
-                    return (false, null, null, await ReadErrorAsync(response));
+                    return (false, null, null, null, await ReadErrorAsync(response));
 
                 var json = await response.Content.ReadAsStringAsync();
                 string? plain = null;
+                string? createdEmail = null;
                 IReadOnlyList<string>? recipients = null;
                 if (!string.IsNullOrWhiteSpace(json))
                 {
                     using var doc = JsonDocument.Parse(json);
                     if (doc.RootElement.TryGetProperty("plainPassword", out var pw))
                         plain = pw.GetString();
+                    if (doc.RootElement.TryGetProperty("email", out var createdEmailProperty) && createdEmailProperty.ValueKind == JsonValueKind.String)
+                        createdEmail = createdEmailProperty.GetString();
                     if (doc.RootElement.TryGetProperty("notificationRecipients", out var recs) && recs.ValueKind == JsonValueKind.Array)
                     {
                         recipients = recs
@@ -228,11 +254,11 @@ namespace WebService.Adapters
                             .ToList();
                     }
                 }
-                return (true, plain, recipients, null);
+                return (true, plain, createdEmail, recipients, null);
             }
             catch (Exception)
             {
-                return (false, null, null, "No se pudo conectar con el servicio de usuarios.");
+                return (false, null, null, null, "No se pudo conectar con el servicio de usuarios.");
             }
         }
 

@@ -11,8 +11,9 @@ public interface IEmpleadosAdapter : IAdapter
     Task<(bool ok, string? error)> EliminarEmpleadoAsync(int id);
     Task<(bool ok, IEnumerable<UsuarioDto>? usuarios, string? error)> GetAllUsuariosAsync();
     Task<(bool ok, UsuarioDto? usuario, string? error)> GetUsuarioByIdAsync(int id);
+    Task<(bool ok, UsuarioDto? usuario, string? error)> GetUsuarioByEmailAsync(string email);
     Task<(bool ok, UsuarioDto? usuario, string? error)> GetUsuarioByEmpleadoIdAsync(int empleadoId);
-    Task<(bool ok, string? plainPassword, IReadOnlyList<string>? notificationRecipients, string? error)> CreateUsuarioAsync(int empleadoId, string email, string? password);
+    Task<(bool ok, string? plainPassword, string? createdEmail, IReadOnlyList<string>? notificationRecipients, string? error)> CreateUsuarioAsync(int empleadoId, string email, string? password);
     Task<(bool ok, string? error)> UpdateUsuarioAsync(int id, string email, bool activo);
     Task<(bool ok, string? plainPassword, string? error)> ResetPasswordAsync(int id);
     Task<(bool ok, string? error)> UpdateUsuarioRolAsync(int usuarioId, string rolNombre);
