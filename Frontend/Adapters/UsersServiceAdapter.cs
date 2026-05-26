@@ -46,6 +46,29 @@ namespace WebService.Adapters
             return (true, response, null);
         }
 
+        public async Task<(bool ok, string? error)> VerifyCurrentPasswordAsync(int usuarioLoginId, string currentPassword)
+        {
+            HttpResponseMessage response;
+            try
+            {
+                response = await SendAsync(HttpMethod.Post, $"api/users/{usuarioLoginId}/verify-current-password", new VerifyCurrentPasswordRequestDto
+                {
+                    CurrentPassword = currentPassword
+                });
+            }
+            catch (Exception)
+            {
+                return (false, "No se pudo conectar con el servicio de usuarios.");
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return (false, await ReadErrorAsync(response));
+            }
+
+            return (true, null);
+        }
+
         public async Task<(bool ok, string? error)> ChangePasswordAsync(int usuarioLoginId, string currentPassword, string newPassword, string confirmPassword)
         {
             HttpResponseMessage response;

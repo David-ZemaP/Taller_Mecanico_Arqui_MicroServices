@@ -25,10 +25,14 @@ namespace WebService.Pages
 
         public string ReturnUrl { get; set; } = "/";
 
+        public bool PasswordChangedAfterFirstLogin { get; set; }
+
         public void OnGet(string? returnUrl = null)
         {
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 ReturnUrl = returnUrl;
+
+            PasswordChangedAfterFirstLogin = TempData["PasswordChangedOnFirstLogin"] != null;
         }
 
         public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
