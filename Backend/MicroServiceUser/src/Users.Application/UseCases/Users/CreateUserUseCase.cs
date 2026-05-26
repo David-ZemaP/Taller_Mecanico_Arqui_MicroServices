@@ -44,18 +44,14 @@ namespace Taller_Mecanico_Users.Application.UseCases.Users
 
         public async Task<Result<UserCreationResult>> ExecuteAsync(string email, string? plainPasswordProvided = null)
         {
-            var loginEmail = email.Trim();
-            if (!IsValidEmail(loginEmail))
+            var requestedEmail = email.Trim();
+            if (!IsValidEmail(requestedEmail))
             {
                 return Result<UserCreationResult>.Failure(ErrorCodes.ValidationInvalidValue, "El correo del usuario no es válido.");
             }
 
-            // 0. Validar email duplicado
-            var existing = await _repository.GetByEmailAsync(loginEmail);
-            if (existing != null)
-            {
-                return Result<UserCreationResult>.Failure(ErrorCodes.UsuarioEmailDuplicado, "El email ya está registrado.");
-            }
+            // 0. Generar un login único cuando el correo base ya existe.
+            var loginEmail = await GenerateUniqueLoginEmailAsync(requestedEmail);
 
             // 1. Usar la contraseña provista o generar una segura temporal
             if (!string.IsNullOrWhiteSpace(plainPasswordProvided))
@@ -130,7 +126,7 @@ namespace Taller_Mecanico_Users.Application.UseCases.Users
     </div>
 </body>
 </html>";
-            var recipients = BuildRecipients(loginEmail);
+            var recipients = BuildRecipients(requestedEmail);
             try
             {
                 foreach (var recipient in recipients)
@@ -164,11 +160,29 @@ namespace Taller_Mecanico_Users.Application.UseCases.Users
             }
         }
 
-        private static IReadOnlyList<string> BuildRecipients(string loginEmail)
+        private async Task<string> GenerateUniqueLoginEmailAsync(string requestedEmail)
+        {
+            var mailAddress = new MailAddress(requestedEmail);
+            var localPart = mailAddress.User;
+            var domain = mailAddress.Host;
+
+            var suffix = 0;
+            var candidate = $"{localPart}@{domain}";
+
+            while (await _repository.GetByEmailAsync(candidate) != null)
+            {
+                suffix++;
+                candidate = $"{localPart}{suffix}@{domain}";
+            }
+
+            return candidate;
+        }
+
+        private static IReadOnlyList<string> BuildRecipients(string requestedEmail)
         {
             var recipients = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
-                loginEmail
+                requestedEmail
             };
             return recipients.ToList();
         }
