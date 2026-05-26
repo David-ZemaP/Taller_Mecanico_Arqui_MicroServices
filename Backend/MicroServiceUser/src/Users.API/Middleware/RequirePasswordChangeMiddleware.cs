@@ -23,8 +23,9 @@ namespace Taller_Mecanico_Users.API.Middleware
                 var path = context.Request.Path.Value?.ToLowerInvariant() ?? string.Empty;
                 var isLoginPath = path.StartsWith("/api/auth/login");
                 var isChangePasswordPath = path.StartsWith("/api/users/") && path.Contains("/change-password");
+                var isPasswordVerificationPath = path.StartsWith("/api/users/") && path.Contains("/verify-current-password");
 
-                if (!isLoginPath && !isChangePasswordPath)
+                if (!isLoginPath && !isChangePasswordPath && !isPasswordVerificationPath)
                 {
                     var claimValue = context.User.FindFirst("RequiereCambio")?.Value;
                     if (bool.TryParse(claimValue, out var requiresPasswordChange) && requiresPasswordChange)

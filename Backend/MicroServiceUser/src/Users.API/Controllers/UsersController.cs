@@ -25,6 +25,7 @@ namespace Taller_Mecanico_Users.Controllers
         private readonly DeleteUserUseCase _deleteUserUseCase;
         private readonly IRolRepository _rolRepository;
         private readonly IUsuarioLoginRepository _usuarioLoginRepository;
+        private readonly IPasswordHasher _passwordHasher;
 
         public UsersController(
             CreateUserUseCase createUserUseCase,
@@ -36,7 +37,8 @@ namespace Taller_Mecanico_Users.Controllers
             ResetPasswordUseCase resetPasswordUseCase,
             DeleteUserUseCase deleteUserUseCase,
             IRolRepository rolRepository,
-            IUsuarioLoginRepository usuarioLoginRepository)
+            IUsuarioLoginRepository usuarioLoginRepository,
+            IPasswordHasher passwordHasher)
         {
             _createUserUseCase = createUserUseCase;
             _getUserByIdUseCase = getUserByIdUseCase;
@@ -47,6 +49,7 @@ namespace Taller_Mecanico_Users.Controllers
             _deleteUserUseCase = deleteUserUseCase;
             _rolRepository = rolRepository;
             _usuarioLoginRepository = usuarioLoginRepository;
+            _passwordHasher = passwordHasher;
         }
 
         [HttpPost]
@@ -129,6 +132,40 @@ namespace Taller_Mecanico_Users.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpPost("{id}/verify-current-password")]
+        [Authorize]
+        public async Task<IActionResult> VerifyCurrentPassword(int id, [FromBody] VerifyCurrentPasswordRequest request)
+        {
+            if (!CanChangeOwnPassword(id))
+            {
+                return Forbid();
+            }
+
+            if (string.IsNullOrWhiteSpace(request.CurrentPassword))
+            {
+                return BadRequest(new { message = "La contraseña actual es obligatoria." });
+            }
+
+            var userResult = await _usuarioLoginRepository.GetByIdAsync(id);
+            if (userResult.IsFailure)
+            {
+                return ApiResultMapper.MapError(this, userResult);
+            }
+
+            var user = userResult.Value;
+            if (user == null)
+            {
+                return NotFound(new { message = "Usuario no encontrado." });
+            }
+
+            if (!_passwordHasher.VerifyPassword(request.CurrentPassword, user.PasswordHash))
+            {
+                return BadRequest(new { message = "La contraseña actual es incorrecta." });
+            }
+
+            return Ok(new { valid = true });
         }
 
         [HttpPost("{id}/reset-password")]
@@ -263,6 +300,11 @@ namespace Taller_Mecanico_Users.Controllers
         public string NewPassword { get; set; } = string.Empty;
         public string ConfirmPassword { get; set; } = string.Empty;
     }
+
+        public class VerifyCurrentPasswordRequest
+        {
+            public string CurrentPassword { get; set; } = string.Empty;
+        }
 
     public class UpdateRoleRequest
     {

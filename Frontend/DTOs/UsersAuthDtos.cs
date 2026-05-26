@@ -13,4 +13,9 @@ namespace WebService.DTOs
         public string NewPassword { get; set; } = string.Empty;
         public string ConfirmPassword { get; set; } = string.Empty;
     }
+
+    public class VerifyCurrentPasswordRequestDto
+    {
+        public string CurrentPassword { get; set; } = string.Empty;
+    }
 }
