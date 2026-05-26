@@ -2,11 +2,10 @@ using MicroServiceProduct.Domain.Entities;
 
 namespace MicroServiceProduct.Domain.Repositories;
 
-public interface IProductRepository
+public interface IProductRepository : IRepository<Product, Guid>
 {
-    Task<IEnumerable<Product>> GetAllAsync(CancellationToken ct = default);
-    Task<Product?> GetByIdAsync(Guid id, CancellationToken ct = default);
-    Task AddAsync(Product product, CancellationToken ct = default);
-    Task UpdateAsync(Product product, CancellationToken ct = default);
+    /// <summary>
+    /// Eliminación lógica de un producto, registrando quién lo eliminó.
+    /// </summary>
     Task DeleteAsync(Guid id, string? deletedBy, CancellationToken ct = default);
 }

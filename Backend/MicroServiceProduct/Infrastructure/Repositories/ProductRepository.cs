@@ -20,14 +20,18 @@ public class ProductRepository : IProductRepository
         await _db.SaveChangesAsync(ct);
     }
 
+    // ────────────── IRepository<Product, Guid> ──────────────
+
+    async Task IRepository<Product, Guid>.DeleteAsync(Guid id, CancellationToken ct)
+        => await DeleteAsync(id, deletedBy: null, ct);
+
+    // ────────────── IProductRepository ──────────────
+
     public async Task DeleteAsync(Guid id, string? deletedBy, CancellationToken ct = default)
     {
         var p = await _db.Products.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (p is null) return;
-        // Soft delete
-        p.IsDeleted = true;
-        p.DeletedAt = DateTime.UtcNow;
-        p.DeletedBy = deletedBy;
+        p.Eliminar(deletedBy);
         _db.Products.Update(p);
         await _db.SaveChangesAsync(ct);
     }

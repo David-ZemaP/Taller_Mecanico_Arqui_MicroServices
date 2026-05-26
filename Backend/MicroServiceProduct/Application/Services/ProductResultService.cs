@@ -7,6 +7,7 @@ namespace MicroServiceProduct.Application.Services;
 
 /// <summary>
 /// Implementación del servicio de productos con patrón Result y validaciones.
+/// Usa los factory methods de la entidad Product (Crear, Modificar, Eliminar).
 /// </summary>
 public class ProductResultService : IProductResultService
 {
@@ -22,7 +23,7 @@ public class ProductResultService : IProductResultService
         try
         {
             var items = await _repo.GetAllAsync(ct);
-            var dtos = items.Select(p => new ProductDto(p.Id, p.Name, p.Description, p.Price, p.CreatedAt)).ToList();
+            var dtos = items.Select(ToDto).ToList();
             return Result<IEnumerable<ProductDto>>.Success(dtos);
         }
         catch (Exception ex)
@@ -37,9 +38,10 @@ public class ProductResultService : IProductResultService
     {
         try
         {
-            var validationResult = ProductValidator.ValidateProductId(id);
-            if (validationResult.IsFailure)
-                return Result<ProductDto>.Failure(validationResult.ErrorCode!, validationResult.ErrorMessage!);
+            if (id == Guid.Empty)
+                return Result<ProductDto>.Failure(
+                    ErrorCodes.ProductInvalidId,
+                    "El ID del producto no es válido.");
 
             var p = await _repo.GetByIdAsync(id, ct);
             if (p is null)
@@ -47,8 +49,7 @@ public class ProductResultService : IProductResultService
                     ErrorCodes.ProductNotFound,
                     ErrorMessages.GetMessage(ErrorCodes.ProductNotFound));
 
-            var dto = new ProductDto(p.Id, p.Name, p.Description, p.Price, p.CreatedAt);
-            return Result<ProductDto>.Success(dto);
+            return Result<ProductDto>.Success(ToDto(p));
         }
         catch (Exception ex)
         {
@@ -62,22 +63,13 @@ public class ProductResultService : IProductResultService
     {
         try
         {
-            var validationResult = ProductValidator.ValidateCreateProduct(name, description, price);
-            if (validationResult.IsFailure)
-                return Result<ProductDto>.Failure(validationResult.ErrorCode!, validationResult.ErrorMessage!);
+            var result = Product.Crear(name, description, price, stock: 0);
+            if (result.IsFailure)
+                return Result<ProductDto>.Failure(result.ErrorCode!, result.ErrorMessage!);
 
-            var p = new Product 
-            { 
-                Id = Guid.NewGuid(), 
-                Name = name!, 
-                Description = description, 
-                Price = price,
-                CreatedAt = DateTime.UtcNow
-            };
-            
+            var p = result.Value!;
             await _repo.AddAsync(p, ct);
-            var dto = new ProductDto(p.Id, p.Name, p.Description, p.Price, p.CreatedAt);
-            return Result<ProductDto>.Success(dto);
+            return Result<ProductDto>.Success(ToDto(p));
         }
         catch (Exception ex)
         {
@@ -91,13 +83,10 @@ public class ProductResultService : IProductResultService
     {
         try
         {
-            var validationResult = ProductValidator.ValidateProductId(id);
-            if (validationResult.IsFailure)
-                return Result.Failure(validationResult.ErrorCode!, validationResult.ErrorMessage!);
-
-            var validateDataResult = ProductValidator.ValidateUpdateProduct(name, description, price);
-            if (validateDataResult.IsFailure)
-                return Result.Failure(validateDataResult.ErrorCode!, validateDataResult.ErrorMessage!);
+            if (id == Guid.Empty)
+                return Result.Failure(
+                    ErrorCodes.ProductInvalidId,
+                    "El ID del producto no es válido.");
 
             var existing = await _repo.GetByIdAsync(id, ct);
             if (existing is null)
@@ -105,10 +94,10 @@ public class ProductResultService : IProductResultService
                     ErrorCodes.ProductNotFound,
                     ErrorMessages.GetMessage(ErrorCodes.ProductNotFound));
 
-            existing.Name = name!;
-            existing.Description = description;
-            existing.Price = price;
-            
+            var modifyResult = existing.Modificar(name, description, price, existing.Stock);
+            if (modifyResult.IsFailure)
+                return modifyResult;
+
             await _repo.UpdateAsync(existing, ct);
             return Result.Success();
         }
@@ -124,9 +113,10 @@ public class ProductResultService : IProductResultService
     {
         try
         {
-            var validationResult = ProductValidator.ValidateProductId(id);
-            if (validationResult.IsFailure)
-                return Result.Failure(validationResult.ErrorCode!, validationResult.ErrorMessage!);
+            if (id == Guid.Empty)
+                return Result.Failure(
+                    ErrorCodes.ProductInvalidId,
+                    "El ID del producto no es válido.");
 
             var existing = await _repo.GetByIdAsync(id, ct);
             if (existing is null)
@@ -134,7 +124,8 @@ public class ProductResultService : IProductResultService
                     ErrorCodes.ProductNotFound,
                     ErrorMessages.GetMessage(ErrorCodes.ProductNotFound));
 
-            await _repo.DeleteAsync(id, ct);
+            existing.Eliminar(deletedBy: null);
+            await _repo.UpdateAsync(existing, ct);
             return Result.Success();
         }
         catch (Exception ex)
@@ -144,4 +135,7 @@ public class ProductResultService : IProductResultService
                 $"Error al eliminar producto: {ex.Message}");
         }
     }
+
+    private static ProductDto ToDto(Product p)
+        => new(p.Id, p.Name, p.Description, p.Price, p.Stock, p.CreatedAt, p.CreatedBy, p.DeletedBy);
 }

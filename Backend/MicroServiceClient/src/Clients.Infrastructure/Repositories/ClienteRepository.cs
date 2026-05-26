@@ -72,7 +72,7 @@ namespace Taller_Mecanico_Clientes.Infrastructure.Repositories
 
                 await docRef.SetAsync(docModel);
                 
-                cliente.Id = docModel.Id;
+                cliente.AsignarIdentificador(docModel.Id);
                 return Result<Cliente>.Success(cliente);
             }
             catch (Exception ex)
@@ -98,9 +98,9 @@ namespace Taller_Mecanico_Clientes.Infrastructure.Repositories
                     return Result<Cliente>.Failure(ErrorCodes.ClienteNotFound, "El cliente a actualizar ha sido eliminado.");
                 }
 
-                cliente.Id = id;
-                cliente.FechaRegistro = docModelExisting.FechaRegistro; // Preserve original creation date
-                cliente.FechaActualizacion = DateTime.UtcNow;
+                // The entity already has the correct Id, FechaRegistro, and FechaActualizacion
+                // set by Reconstituir/Modificar — no need to reassign
+                cliente.AsignarIdentificador(id);
 
                 var docModel = ClienteDocument.FromEntity(cliente);
                 await docRef.SetAsync(docModel, SetOptions.Overwrite);
