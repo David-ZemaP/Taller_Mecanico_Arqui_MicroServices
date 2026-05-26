@@ -19,6 +19,9 @@ firebase-credentials.json
 *.userosscache
 *.sln.docstates
 
+# AI / Editor config
+.claude/
+
 # Build outputs
 publish/
 **/publish/
