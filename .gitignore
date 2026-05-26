@@ -25,6 +25,7 @@ firebase-credentials.json
 # Build outputs
 publish/
 **/publish/
+.build/
 
 # NuGet
 *.nupkg
