@@ -177,9 +177,17 @@
                             <label asp-for="FormDto.SalarioPorHora" class="form-label text-teal">Salario por hora (Bs)</label>
                             <input asp-for="FormDto.SalarioPorHora" type="number" step="0.01" class="form-control form-control-dark" id="formSalarioPorHora" placeholder="0.00" />
                         </div>
-                        <div class="col-md-4" id="campoSalarioAdmin" style="display: none;">
+                        <div class="col-md-4 mb-3 mb-md-0" id="campoSalarioAdmin" style="display: none;">
                             <label asp-for="FormDto.SalarioMensual" class="form-label text-teal">Salario mensual (Bs)</label>
                             <input asp-for="FormDto.SalarioMensual" type="number" step="0.01" class="form-control form-control-dark" id="formSalarioMensual" placeholder="0.00" />
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0" id="campoNivelAcceso" style="display: none;">
+                            <label asp-for="FormDto.NivelAcceso" class="form-label text-teal">Nivel de acceso *</label>
+                            <select asp-for="FormDto.NivelAcceso" class="form-select form-control-dark" id="formNivelAcceso" onchange="sincronizarRol()">
+                                <option value="Gerente">Gerente</option>
+                                <option value="Completo" selected>Completo</option>
+                                <option value="Parcial">Parcial</option>
+                            </select>
                         </div>
                     </div>
 
@@ -314,13 +322,16 @@
             var tipo = document.getElementById('formTipoEmpleado').value;
             var campoSalarioMecanico = document.getElementById('campoSalarioMecanico');
             var campoSalarioAdmin = document.getElementById('campoSalarioAdmin');
+            var campoNivelAcceso = document.getElementById('campoNivelAcceso');
 
             if (tipo === 'Mecanico') {
                 campoSalarioMecanico.style.display = '';
                 campoSalarioAdmin.style.display = 'none';
+                if (campoNivelAcceso) campoNivelAcceso.style.display = 'none';
             } else {
                 campoSalarioMecanico.style.display = 'none';
                 campoSalarioAdmin.style.display = '';
+                if (campoNivelAcceso) campoNivelAcceso.style.display = '';
             }
 
             document.getElementById('emailRequired').style.display = tipo === 'Administrador' ? '' : 'none';
@@ -331,12 +342,18 @@
 
         function sincronizarRol() {
             var tipo = document.getElementById('formTipoEmpleado').value;
-            var rolInput = tipo === 'Mecanico' 
-                ? document.getElementById('formRolNombreMecanico') 
-                : document.getElementById('formRolNombreAdmin');
-            if (rolInput) {
-                document.getElementById('formRolNombre').value = rolInput.value;
+            var rolNombreVal = 'Mecanico';
+            if (tipo === 'Administrador') {
+                var nivel = document.getElementById('formNivelAcceso').value;
+                if (nivel === 'Gerente') {
+                    rolNombreVal = 'Gerente';
+                } else if (nivel === 'Completo') {
+                    rolNombreVal = 'Administrador';
+                } else {
+                    rolNombreVal = 'Mecanico';
+                }
             }
+            document.getElementById('formRolNombre').value = rolNombreVal;
         }
 
         function limpiarFormulario() {
@@ -353,6 +370,8 @@
             document.getElementById('formEstadoLaboral').value = 'Activo';
             document.getElementById('formSalarioPorHora').value = '';
             document.getElementById('formSalarioMensual').value = '';
+            var nivelSelect = document.getElementById('formNivelAcceso');
+            if (nivelSelect) nivelSelect.value = 'Completo';
             // Sincronizar rol inicial
             setTimeout(sincronizarRol, 0);
             document.getElementById('empleadoModalLabel').textContent = 'Crear empleado';
@@ -490,7 +509,6 @@
                     }
                 });
             });
-
-            
+        });
     </script>
 }

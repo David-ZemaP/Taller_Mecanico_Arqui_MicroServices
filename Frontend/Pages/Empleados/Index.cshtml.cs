@@ -124,6 +124,7 @@ namespace WebService.Pages.Empleados
             }
 
             bool isNew = FormDto.EmpleadoId == 0;
+            string? plainPassword = null;
 
             if (isNew)
             {
@@ -137,7 +138,7 @@ namespace WebService.Pages.Empleados
                 // Crear automáticamente el acceso al sistema si se proporcionó email
                 if (!string.IsNullOrWhiteSpace(FormDto.Email) && empleadoId.HasValue)
                 {
-                    var (userOk, _, _, _) = await _adapter.CreateUsuarioAsync(
+                    var (userOk, generatedPassword, _, _) = await _adapter.CreateUsuarioAsync(
                         empleadoId.Value, FormDto.Email, null);
 
                     if (!userOk)
@@ -145,16 +146,20 @@ namespace WebService.Pages.Empleados
                         TempData["UsuarioExistente"] = true;
                         TempData["EmailExistente"] = FormDto.Email;
                     }
-                    else if (!string.IsNullOrWhiteSpace(FormDto.RolNombre))
+                    else
                     {
-                        // Buscar el usuario por empleadoId y luego asignar el rol
-                        var (empUserOk, empUser, _) = await _adapter.GetUsuarioByEmpleadoIdAsync(empleadoId.Value);
-                        if (empUserOk && empUser != null)
+                        plainPassword = generatedPassword;
+                        if (!string.IsNullOrWhiteSpace(FormDto.RolNombre))
                         {
-                            var (rolOk, rolError) = await _adapter.UpdateUsuarioRolAsync(empUser.UsuarioLoginId, FormDto.RolNombre);
-                            if (!rolOk)
+                            // Buscar el usuario por empleadoId y luego asignar el rol
+                            var (empUserOk, empUser, _) = await _adapter.GetUsuarioByEmpleadoIdAsync(empleadoId.Value);
+                            if (empUserOk && empUser != null)
                             {
-                                TempData["EmailWarning"] = $"Empleado creado pero no se pudo asignar el rol: {rolError}";
+                                var (rolOk, rolError) = await _adapter.UpdateUsuarioRolAsync(empUser.UsuarioLoginId, FormDto.RolNombre);
+                                if (!rolOk)
+                                {
+                                    TempData["EmailWarning"] = $"Empleado creado pero no se pudo asignar el rol: {rolError}";
+                                }
                             }
                         }
                     }
@@ -170,7 +175,20 @@ namespace WebService.Pages.Empleados
                 }
             }
 
-            TempData["SuccessMessage"] = isNew ? "Empleado creado correctamente." : "Empleado actualizado correctamente.";
+            if (isNew)
+            {
+                var successMsg = "Empleado creado correctamente.";
+                if (!string.IsNullOrEmpty(plainPassword))
+                {
+                    successMsg += $"<br/><br/><div class='alert alert-info border-secondary text-teal' style='background-color: #1a2c2c;'><i class='bi bi-key-fill me-2'></i><strong>Credenciales de acceso creadas:</strong><br/>Usuario: <code>{FormDto.Email}</code><br/>Contraseña temporal: <strong style='font-size: 1.2rem; color: #20c997; letter-spacing: 1px;'>{plainPassword}</strong></div>";
+                }
+                TempData["SuccessMessage"] = successMsg;
+            }
+            else
+            {
+                TempData["SuccessMessage"] = "Empleado actualizado correctamente.";
+            }
+
             return RedirectToPage();
         }
 

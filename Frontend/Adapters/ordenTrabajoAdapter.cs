@@ -1,18 +1,22 @@
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using WebService.DTOs;
 
 namespace WebService.Adapters
 {
-    /// <summary>
-    /// HTTP client adapter for OrdenTrabajoService (S1).
-    /// Reads the JWT token from session key "JwtToken" and sends it as Bearer on every request.
-    /// </summary>
     public class OrdenTrabajoAdapter
     {
-        private readonly HttpClient _http;
+        private readonly HttpClient _httpProducts;
+        private readonly HttpClient _httpServices;
+        private readonly ClientesAdapter _clientesAdapter;
         private readonly IHttpContextAccessor _ctx;
 
         private static readonly JsonSerializerOptions _jsonOpts = new()
@@ -20,320 +24,621 @@ namespace WebService.Adapters
             PropertyNameCaseInsensitive = true
         };
 
-        public OrdenTrabajoAdapter(HttpClient http, IHttpContextAccessor ctx)
+        // --- Mock Data store for Vehicles, Work Orders, Catalogs ---
+        private static readonly List<VehiculoListDto> _mockVehiculos = new()
         {
-            _http = http;
+            new VehiculoListDto
+            {
+                VehiculoId = 1,
+                Placa = "2345ABC",
+                ClienteId = 1,
+                ClienteNombre = "Juan Perez",
+                Anio = 2020,
+                MarcaNombre = "Toyota",
+                ModeloNombre = "Corolla",
+                ColorNombre = "Blanco"
+            },
+            new VehiculoListDto
+            {
+                VehiculoId = 2,
+                Placa = "9876XYZ",
+                ClienteId = 2,
+                ClienteNombre = "Carlos Ramos",
+                Anio = 2018,
+                MarcaNombre = "Nissan",
+                ModeloNombre = "Sentra",
+                ColorNombre = "Negro"
+            }
+        };
+        private static int _nextVehiculoId = 3;
+
+        private static readonly List<MarcaDto> _mockMarcas = new()
+        {
+            new() { MarcaId = 1, Nombre = "Toyota" },
+            new() { MarcaId = 2, Nombre = "Nissan" },
+            new() { MarcaId = 3, Nombre = "Suzuki" },
+            new() { MarcaId = 4, Nombre = "Hyundai" }
+        };
+        private static readonly List<ModeloDto> _mockModelos = new()
+        {
+            new() { ModeloId = 1, MarcaId = 1, Nombre = "Corolla" },
+            new() { ModeloId = 2, MarcaId = 1, Nombre = "Hilux" },
+            new() { ModeloId = 3, MarcaId = 2, Nombre = "Sentra" },
+            new() { ModeloId = 4, MarcaId = 2, Nombre = "Frontier" },
+            new() { ModeloId = 5, MarcaId = 3, Nombre = "Swift" },
+            new() { ModeloId = 6, MarcaId = 4, Nombre = "Tucson" }
+        };
+        private static readonly List<ColorVehiculoDto> _mockColores = new()
+        {
+            new() { ColorVehiculoId = 1, Nombre = "Rojo" },
+            new() { ColorVehiculoId = 2, Nombre = "Azul" },
+            new() { ColorVehiculoId = 3, Nombre = "Blanco" },
+            new() { ColorVehiculoId = 4, Nombre = "Negro" },
+            new() { ColorVehiculoId = 5, Nombre = "Gris" }
+        };
+
+        private static readonly List<OrdenTrabajoListDto> _mockOrdenes = new()
+        {
+            new OrdenTrabajoListDto
+            {
+                OrdenTrabajoId = 1,
+                VehiculoId = 1,
+                VehiculoPlaca = "2345ABC",
+                FechaIngreso = DateTime.Today.AddDays(-2),
+                EstadoTrabajo = "EnReparacion",
+                EstadoPago = "Pendiente",
+                EstadoVehiculo = "Bueno",
+                Total = 250.0
+            }
+        };
+        private static readonly List<OrdenTrabajoDetalleDto> _mockOrdenDetalles = new()
+        {
+            new OrdenTrabajoDetalleDto
+            {
+                OrdenTrabajoId = 1,
+                ClienteId = 1,
+                ClienteCi = "1234567",
+                ClienteNombre = "Juan Perez",
+                VehiculoId = 1,
+                Placa = "2345ABC",
+                FechaIngreso = DateTime.Today.AddDays(-2).ToString("yyyy-MM-dd"),
+                EstadoTrabajo = "EnReparacion",
+                EstadoPago = "Pendiente",
+                EstadoVehiculo = "Bueno",
+                Total = 250.0,
+                Productos = new()
+                {
+                    new() { ProductoId = 1, Nombre = "Filtro de Aceite", Cantidad = 1, PrecioUnitario = 50.0, Subtotal = 50.0 }
+                },
+                Servicios = new()
+                {
+                    new() { ServicioId = 1, Nombre = "Cambio de Aceite", Cantidad = 1, PrecioUnitario = 200.0, Subtotal = 200.0 }
+                }
+            }
+        };
+        private static int _nextOrdenId = 2;
+
+        // --- Product ID Mapping Concurrent Dictionaries ---
+        private static readonly ConcurrentDictionary<int, Guid> _productIntToGuid = new();
+        private static readonly ConcurrentDictionary<Guid, int> _productGuidToInt = new();
+        private static readonly ConcurrentDictionary<Guid, int> _productStock = new();
+        private static int _nextProductId = 0;
+
+        private static int GetOrAddProductIntId(Guid guid)
+        {
+            return _productGuidToInt.GetOrAdd(guid, id =>
+            {
+                var newId = Interlocked.Increment(ref _nextProductId);
+                _productIntToGuid[newId] = id;
+                return newId;
+            });
+        }
+
+        private static Guid GetProductGuid(int intId)
+        {
+            return _productIntToGuid.TryGetValue(intId, out var guid) ? guid : Guid.Empty;
+        }
+
+        // --- DTO models for backend APIs ---
+        private class BackendProduct
+        {
+            public Guid Id { get; set; }
+            public string Name { get; set; } = string.Empty;
+            public string? Description { get; set; }
+            public decimal Price { get; set; }
+        }
+
+        private class BackendService
+        {
+            public int Id { get; set; }
+            public string Nombre { get; set; } = string.Empty;
+            public string? Descripcion { get; set; }
+            public decimal PrecioBase { get; set; }
+            public int CategoriaServicioId { get; set; }
+        }
+
+        public OrdenTrabajoAdapter(IHttpClientFactory httpClientFactory, ClientesAdapter clientesAdapter, IHttpContextAccessor ctx)
+        {
+            _httpProducts = httpClientFactory.CreateClient("ProductsApi");
+            _httpServices = httpClientFactory.CreateClient("ServicesApi");
+            _clientesAdapter = clientesAdapter;
             _ctx = ctx;
         }
 
-        // ─── Órdenes de Trabajo ───────────────────────────────────────────────
+        // ─── Órdenes de Trabajo (Mocked in-memory) ─────────────────────────────
 
         public async Task<List<OrdenTrabajoListDto>> GetAllOrdenesAsync()
-            => await GetAsync<List<OrdenTrabajoListDto>>("api/ordenestrabajo") ?? new List<OrdenTrabajoListDto>();
+        {
+            await Task.Delay(50);
+            return _mockOrdenes.Where(o => !o.IsDeleted).ToList();
+        }
 
-        public Task<OrdenTrabajoDetalleDto?> GetOrdenDetalleAsync(int id)
-            => GetAsync<OrdenTrabajoDetalleDto>($"api/ordenestrabajo/{id}");
+        public async Task<OrdenTrabajoDetalleDto?> GetOrdenDetalleAsync(int id)
+        {
+            await Task.Delay(50);
+            return _mockOrdenDetalles.FirstOrDefault(o => o.OrdenTrabajoId == id && !o.IsDeleted);
+        }
 
         public async Task<List<OrdenTrabajoListDto>> GetOrdenesByMecanicoAsync(int mecanicoId)
-            => await GetAsync<List<OrdenTrabajoListDto>>($"api/ordenestrabajo/mecanico/{mecanicoId}") 
-               ?? new List<OrdenTrabajoListDto>();
+        {
+            await Task.Delay(50);
+            // Since it's mocked, we return all active work orders for simulation
+            return _mockOrdenes.Where(o => !o.IsDeleted).ToList();
+        }
 
         public async Task<(bool ok, string? error, int id)> RegistrarOrdenAsync(OrdenTrabajoFormDto form)
         {
-            var body = new
+            await Task.Delay(50);
+            var newId = Interlocked.Increment(ref _nextOrdenId);
+
+            var vehiculo = _mockVehiculos.FirstOrDefault(v => v.VehiculoId == form.VehiculoId);
+            var vehiculoPlaca = vehiculo?.Placa ?? "Desconocido";
+            var clienteNombre = vehiculo?.ClienteNombre ?? "Desconocido";
+
+            var listDto = new OrdenTrabajoListDto
             {
-                vehiculoId = form.VehiculoId,
-                fechaIngreso = form.FechaIngreso,
-                estadoVehiculo = form.EstadoVehiculo,
-                estadoTrabajo = form.EstadoTrabajo,
-                estadoPago = form.EstadoPago,
-                total = form.Total,
-                productos = form.Productos.Select(p => new { p.ProductoId, p.Cantidad, p.PrecioUnitario }),
-                servicios = form.Servicios.Select(s => new { s.ServicioId, s.Cantidad, s.PrecioUnitario }),
-                mecanicosSeleccionados = form.MecanicosSeleccionados
+                OrdenTrabajoId = newId,
+                VehiculoId = form.VehiculoId,
+                VehiculoPlaca = vehiculoPlaca,
+                FechaIngreso = form.FechaIngreso,
+                EstadoTrabajo = form.EstadoTrabajo,
+                EstadoPago = form.EstadoPago,
+                EstadoVehiculo = form.EstadoVehiculo,
+                Total = form.Total
             };
 
-            var response = await SendAsync(HttpMethod.Post, "api/ordenestrabajo", body);
-            if (!response.IsSuccessStatusCode)
+            var detailDto = new OrdenTrabajoDetalleDto
             {
-                var err = await ReadErrorAsync(response);
-                return (false, err, 0);
+                OrdenTrabajoId = newId,
+                ClienteId = form.ClienteId,
+                ClienteNombre = clienteNombre,
+                VehiculoId = form.VehiculoId,
+                Placa = vehiculoPlaca,
+                FechaIngreso = form.FechaIngreso.ToString("yyyy-MM-dd"),
+                EstadoTrabajo = form.EstadoTrabajo,
+                EstadoPago = form.EstadoPago,
+                EstadoVehiculo = form.EstadoVehiculo,
+                Total = form.Total
+            };
+
+            // Map and resolve product details
+            foreach (var p in form.Productos)
+            {
+                var prod = await GetProductoAsync(p.ProductoId);
+                detailDto.Productos.Add(new OrdenTrabajoDetalleProductoDto
+                {
+                    ProductoId = p.ProductoId,
+                    Nombre = prod?.Nombre ?? $"Producto #{p.ProductoId}",
+                    Cantidad = p.Cantidad,
+                    PrecioUnitario = p.PrecioUnitario ?? prod?.Precio ?? 0.0,
+                    Subtotal = p.Cantidad * (p.PrecioUnitario ?? prod?.Precio ?? 0.0)
+                });
             }
 
-            var result = await DeserializeAsync<JsonElement>(response);
-            var newId = result.TryGetProperty("id", out var idProp) ? idProp.GetInt32() : 0;
+            // Map and resolve service details
+            foreach (var s in form.Servicios)
+            {
+                var svc = await GetServicioAsync(s.ServicioId);
+                detailDto.Servicios.Add(new OrdenTrabajoDetalleServicioDto
+                {
+                    ServicioId = s.ServicioId,
+                    Nombre = svc?.Nombre ?? $"Servicio #{s.ServicioId}",
+                    Cantidad = s.Cantidad,
+                    PrecioUnitario = s.PrecioUnitario ?? svc?.Precio ?? 0.0,
+                    Subtotal = s.Cantidad * (s.PrecioUnitario ?? svc?.Precio ?? 0.0)
+                });
+            }
+
+            _mockOrdenes.Add(listDto);
+            _mockOrdenDetalles.Add(detailDto);
+
             return (true, null, newId);
         }
 
         public async Task<(bool ok, string? error)> ActualizarOrdenAsync(OrdenTrabajoFormDto form)
         {
-            var body = new
-            {
-                ordenTrabajoId = form.OrdenTrabajoId,
-                vehiculoId = form.VehiculoId,
-                fechaIngreso = form.FechaIngreso,
-                fechaEntrega = form.FechaEntrega,
-                estadoTrabajo = form.EstadoTrabajo,
-                estadoPago = form.EstadoPago,
-                estadoVehiculo = form.EstadoVehiculo,
-                total = form.Total
-            };
+            await Task.Delay(50);
+            var ord = _mockOrdenes.FirstOrDefault(o => o.OrdenTrabajoId == form.OrdenTrabajoId);
+            var det = _mockOrdenDetalles.FirstOrDefault(o => o.OrdenTrabajoId == form.OrdenTrabajoId);
+            if (ord == null || det == null) return (false, "Orden de trabajo no encontrada.");
 
-            var response = await SendAsync(HttpMethod.Put, $"api/ordenestrabajo/{form.OrdenTrabajoId}", body);
-            if (!response.IsSuccessStatusCode)
-                return (false, await ReadErrorAsync(response));
+            ord.FechaIngreso = form.FechaIngreso;
+            ord.FechaEntrega = form.FechaEntrega;
+            ord.EstadoTrabajo = form.EstadoTrabajo;
+            ord.EstadoPago = form.EstadoPago;
+            ord.EstadoVehiculo = form.EstadoVehiculo;
+            ord.Total = form.Total;
+
+            det.FechaIngreso = form.FechaIngreso.ToString("yyyy-MM-dd");
+            det.FechaEntrega = form.FechaEntrega?.ToString("yyyy-MM-dd");
+            det.EstadoTrabajo = form.EstadoTrabajo;
+            det.EstadoPago = form.EstadoPago;
+            det.EstadoVehiculo = form.EstadoVehiculo;
+            det.Total = form.Total;
+
             return (true, null);
         }
 
         public async Task<(bool ok, string? error)> AnularOrdenAsync(int id)
         {
-            var response = await SendAsync(HttpMethod.Delete, $"api/ordenestrabajo/{id}");
-            if (!response.IsSuccessStatusCode)
-                return (false, await ReadErrorAsync(response));
+            await Task.Delay(50);
+            var ord = _mockOrdenes.FirstOrDefault(o => o.OrdenTrabajoId == id);
+            var det = _mockOrdenDetalles.FirstOrDefault(o => o.OrdenTrabajoId == id);
+            if (ord != null) ord.IsDeleted = true;
+            if (det != null) det.IsDeleted = true;
             return (true, null);
         }
 
         public async Task<(bool ok, string? error)> RestaurarOrdenAsync(int id)
         {
-            var response = await SendAsync(HttpMethod.Put, $"api/ordenestrabajo/{id}/restaurar");
-            if (!response.IsSuccessStatusCode)
-                return (false, await ReadErrorAsync(response));
+            await Task.Delay(50);
+            var ord = _mockOrdenes.FirstOrDefault(o => o.OrdenTrabajoId == id);
+            var det = _mockOrdenDetalles.FirstOrDefault(o => o.OrdenTrabajoId == id);
+            if (ord != null) ord.IsDeleted = false;
+            if (det != null) det.IsDeleted = false;
             return (true, null);
         }
 
-        public Task<List<VehiculoLookupDto>> BuscarVehiculosAsync(string term, int? clienteId = null)
+        public async Task<List<VehiculoLookupDto>> BuscarVehiculosAsync(string term, int? clienteId = null)
         {
-            var query = $"api/ordenestrabajo/vehiculos/buscar?term={Uri.EscapeDataString(term)}";
-            if (clienteId.HasValue) query += $"&clienteId={clienteId}";
-            return GetAsync<List<VehiculoLookupDto>>(query) ?? Task.FromResult(new List<VehiculoLookupDto>());
+            await Task.Delay(50);
+            var query = _mockVehiculos.AsQueryable();
+            if (clienteId.HasValue)
+                query = query.Where(v => v.ClienteId == clienteId.Value);
+
+            if (!string.IsNullOrWhiteSpace(term))
+            {
+                var norm = term.ToLowerInvariant();
+                query = query.Where(v => v.Placa.ToLowerInvariant().Contains(norm) ||
+                                         v.MarcaNombre.ToLowerInvariant().Contains(norm) ||
+                                         v.ModeloNombre.ToLowerInvariant().Contains(norm));
+            }
+
+            return query.Select(v => new VehiculoLookupDto
+            {
+                Id = v.VehiculoId,
+                Text = $"{v.Placa} - {v.MarcaNombre} {v.ModeloNombre} ({v.ColorNombre})"
+            }).ToList();
         }
 
-        // ─── Clientes ─────────────────────────────────────────────────────────
+        // ─── Clientes (Delegated to ClientesAdapter) ───────────────────────────
 
-        public async Task<List<ClienteLookupDto>> GetAllClientesAsync()
-        {
-            var result = await GetAsync<List<ClienteLookupDto>>("api/clientes");
-            return result ?? new List<ClienteLookupDto>();
-        }
+        public Task<List<ClienteLookupDto>> GetAllClientesAsync()
+            => _clientesAdapter.GetAllClientesAsync();
 
-        public async Task<List<ClienteLookupDto>> BuscarClientesAsync(string term)
-        {
-            var query = $"api/clientes?term={Uri.EscapeDataString(term)}";
-            var result = await GetAsync<List<ClienteLookupDto>>(query);
-            return result ?? new List<ClienteLookupDto>();
-        }
+        public Task<List<ClienteLookupDto>> BuscarClientesAsync(string term)
+            => _clientesAdapter.BuscarClientesAsync(term);
 
-        public async Task<ClienteLookupDto?> GetClienteAsync(int id)
-            => await GetAsync<ClienteLookupDto>($"api/clientes/{id}");
+        public Task<ClienteLookupDto?> GetClienteAsync(int id)
+            => _clientesAdapter.GetClienteAsync(id);
 
         public async Task<List<VehiculoListDto>> GetVehiculosByClienteAsync(int clienteId)
         {
-            var all = await GetAsync<List<VehiculoListDto>>("api/vehiculos");
-            return all?.Where(v => v.ClienteId == clienteId).ToList() ?? new List<VehiculoListDto>();
+            await Task.Delay(50);
+            return _mockVehiculos.Where(v => v.ClienteId == clienteId).ToList();
         }
 
-        public async Task<(bool ok, string? error)> DeleteClienteAsync(int id)
-        {
-            var response = await SendAsync(HttpMethod.Delete, $"api/clientes/{id}");
-            if (!response.IsSuccessStatusCode)
-                return (false, await ReadErrorAsync(response));
-            return (true, null);
-        }
+        public Task<(bool ok, string? error)> DeleteClienteAsync(int id)
+            => _clientesAdapter.DeleteClienteAsync(id);
 
-        public async Task<(bool ok, string? error, ClienteLookupDto? cliente)> SaveClienteAsync(ClienteFormDto form)
-        {
-            HttpResponseMessage response;
-            if (form.ClienteId == 0)
-            {
-                response = await SendAsync(HttpMethod.Post, "api/clientes", new
-                {
-                    nombres = form.Nombres,
-                    primerApellido = form.PrimerApellido,
-                    segundoApellido = form.SegundoApellido,
-                    ciNumero = form.CiNumero,
-                    ciComplemento = form.CiComplemento,
-                    telefono = form.Telefono,
-                    email = form.Email
-                });
-            }
-            else
-            {
-                response = await SendAsync(HttpMethod.Put, $"api/clientes/{form.ClienteId}", new
-                {
-                    nombres = form.Nombres,
-                    primerApellido = form.PrimerApellido,
-                    segundoApellido = form.SegundoApellido,
-                    ciNumero = form.CiNumero,
-                    ciComplemento = form.CiComplemento,
-                    telefono = form.Telefono,
-                    email = form.Email
-                });
-            }
+        public Task<(bool ok, string? error, ClienteLookupDto? cliente)> SaveClienteAsync(ClienteFormDto form)
+            => _clientesAdapter.SaveClienteAsync(form);
 
-            if (!response.IsSuccessStatusCode)
-                return (false, await ReadErrorAsync(response), null);
-
-            ClienteLookupDto cliente;
-            if (form.ClienteId == 0)
-            {
-                var created = await DeserializeAsync<ClienteLookupDto>(response);
-                cliente = created ?? new ClienteLookupDto { ClienteId = 0, Nombres = form.Nombres, PrimerApellido = form.PrimerApellido, CiNumero = form.CiNumero };
-            }
-            else
-            {
-                cliente = new ClienteLookupDto
-                {
-                    ClienteId = form.ClienteId,
-                    Nombres = form.Nombres,
-                    PrimerApellido = form.PrimerApellido,
-                    SegundoApellido = form.SegundoApellido,
-                    CiNumero = form.CiNumero,
-                    CiComplemento = form.CiComplemento,
-                    Telefono = form.Telefono,
-                    Email = form.Email
-                };
-            }
-
-            return (true, null, cliente);
-        }
-
-        // ─── Productos ────────────────────────────────────────────────────────
+        // ─── Productos (Connected to MicroServiceProduct backend) ─────────────────
 
         public async Task<List<ProductoDto>> GetAllProductosAsync()
-            => await GetAsync<List<ProductoDto>>("api/productos") ?? new List<ProductoDto>();
+        {
+            try
+            {
+                var response = await SendAsync(_httpProducts, HttpMethod.Get, "api/products");
+                if (!response.IsSuccessStatusCode) return new List<ProductoDto>();
 
-        public Task<ProductoDto?> GetProductoAsync(int id)
-            => GetAsync<ProductoDto>($"api/productos/{id}");
+                var backendList = await DeserializeAsync<List<BackendProduct>>(response);
+                if (backendList == null) return new List<ProductoDto>();
+
+                return backendList.Select(p => new ProductoDto
+                {
+                    ProductoId = GetOrAddProductIntId(p.Id),
+                    Nombre = p.Name,
+                    Precio = (double)p.Price,
+                    Stock = _productStock.TryGetValue(p.Id, out var s) ? s : 10
+                }).ToList();
+            }
+            catch
+            {
+                return new List<ProductoDto>();
+            }
+        }
+
+        public async Task<ProductoDto?> GetProductoAsync(int id)
+        {
+            try
+            {
+                var guid = GetProductGuid(id);
+                if (guid == Guid.Empty) return null;
+
+                var response = await SendAsync(_httpProducts, HttpMethod.Get, $"api/products/{guid}");
+                if (!response.IsSuccessStatusCode) return null;
+
+                var p = await DeserializeAsync<BackendProduct>(response);
+                if (p == null) return null;
+
+                return new ProductoDto
+                {
+                    ProductoId = id,
+                    Nombre = p.Name,
+                    Precio = (double)p.Price,
+                    Stock = _productStock.TryGetValue(p.Id, out var s) ? s : 10
+                };
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         public async Task<(bool ok, string? error)> SaveProductoAsync(ProductoFormDto form)
         {
-            HttpResponseMessage response;
-            if (form.ProductoId == 0)
+            try
             {
-                var body = new { form.Nombre, form.Precio, form.Stock };
-                response = await SendAsync(HttpMethod.Post, "api/productos", body);
-            }
-            else
-            {
-                var body = new { form.ProductoId, form.Nombre, form.Precio, form.Stock };
-                response = await SendAsync(HttpMethod.Put, $"api/productos/{form.ProductoId}", body);
-            }
+                HttpResponseMessage response;
+                var body = new
+                {
+                    name = form.Nombre,
+                    description = form.Nombre,
+                    price = (decimal)form.Precio
+                };
 
-            if (!response.IsSuccessStatusCode)
-                return (false, await ReadErrorAsync(response));
-            return (true, null);
+                if (form.ProductoId == 0)
+                {
+                    response = await SendAsync(_httpProducts, HttpMethod.Post, "api/products", body);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var createdProduct = await DeserializeAsync<BackendProduct>(response);
+                        if (createdProduct != null)
+                        {
+                            var intId = GetOrAddProductIntId(createdProduct.Id);
+                            _productStock[createdProduct.Id] = form.Stock;
+                        }
+                    }
+                }
+                else
+                {
+                    var guid = GetProductGuid(form.ProductoId);
+                    if (guid == Guid.Empty) return (false, "ID de producto inválido.");
+
+                    response = await SendAsync(_httpProducts, HttpMethod.Put, $"api/products/{guid}", body);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        _productStock[guid] = form.Stock;
+                    }
+                }
+
+                if (!response.IsSuccessStatusCode)
+                    return (false, await ReadErrorAsync(response));
+
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error de conexión con servicio de productos: {ex.Message}");
+            }
         }
 
-        public Task DeleteProductoAsync(int id) => SendAsync(HttpMethod.Delete, $"api/productos/{id}");
+        public async Task DeleteProductoAsync(int id)
+        {
+            try
+            {
+                var guid = GetProductGuid(id);
+                if (guid == Guid.Empty) return;
 
-        // ─── Servicios ────────────────────────────────────────────────────────
+                await SendAsync(_httpProducts, HttpMethod.Delete, $"api/products/{guid}");
+            }
+            catch {}
+        }
+
+        // ─── Servicios (Connected to MicroServiceService backend) ─────────────────
 
         public async Task<List<ServicioDto>> GetAllServiciosAsync()
-            => await GetAsync<List<ServicioDto>>("api/servicios") ?? new List<ServicioDto>();
+        {
+            try
+            {
+                var response = await SendAsync(_httpServices, HttpMethod.Get, "api/servicios?estado=true");
+                if (!response.IsSuccessStatusCode) return new List<ServicioDto>();
 
-        public Task<ServicioDto?> GetServicioAsync(int id)
-            => GetAsync<ServicioDto>($"api/servicios/{id}");
+                var backendList = await DeserializeAsync<List<BackendService>>(response);
+                if (backendList == null) return new List<ServicioDto>();
+
+                return backendList.Select(s => new ServicioDto
+                {
+                    ServicioId = s.Id,
+                    Nombre = s.Nombre,
+                    Precio = (double)s.PrecioBase
+                }).ToList();
+            }
+            catch
+            {
+                return new List<ServicioDto>();
+            }
+        }
+
+        public async Task<ServicioDto?> GetServicioAsync(int id)
+        {
+            try
+            {
+                var response = await SendAsync(_httpServices, HttpMethod.Get, $"api/servicios/{id}");
+                if (!response.IsSuccessStatusCode) return null;
+
+                var s = await DeserializeAsync<BackendService>(response);
+                if (s == null) return null;
+
+                return new ServicioDto
+                {
+                    ServicioId = s.Id,
+                    Nombre = s.Nombre,
+                    Precio = (double)s.PrecioBase
+                };
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         public async Task<(bool ok, string? error)> SaveServicioAsync(ServicioFormDto form)
         {
-            HttpResponseMessage response;
-            if (form.ServicioId == 0)
+            try
             {
-                var body = new { form.Nombre, form.Precio };
-                response = await SendAsync(HttpMethod.Post, "api/servicios", body);
-            }
-            else
-            {
-                var body = new { form.ServicioId, form.Nombre, form.Precio };
-                response = await SendAsync(HttpMethod.Put, $"api/servicios/{form.ServicioId}", body);
-            }
+                HttpResponseMessage response;
+                var body = new
+                {
+                    nombre = form.Nombre,
+                    descripcion = form.Nombre,
+                    precioBase = (decimal)form.Precio,
+                    duracionEstimadaMinutos = 30, // Default for required field
+                    categoriaServicioId = 1, // Default category
+                    estado = true
+                };
 
-            if (!response.IsSuccessStatusCode)
-                return (false, await ReadErrorAsync(response));
-            return (true, null);
+                if (form.ServicioId == 0)
+                {
+                    response = await SendAsync(_httpServices, HttpMethod.Post, "api/servicios", body);
+                }
+                else
+                {
+                    response = await SendAsync(_httpServices, HttpMethod.Put, $"api/servicios/{form.ServicioId}", body);
+                }
+
+                if (!response.IsSuccessStatusCode)
+                    return (false, await ReadErrorAsync(response));
+
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error de conexión con servicio de servicios: {ex.Message}");
+            }
         }
 
-        public Task DeleteServicioAsync(int id) => SendAsync(HttpMethod.Delete, $"api/servicios/{id}");
+        public async Task DeleteServicioAsync(int id)
+        {
+            try
+            {
+                await SendAsync(_httpServices, HttpMethod.Delete, $"api/servicios/{id}");
+            }
+            catch {}
+        }
 
-        // ─── Vehículos ────────────────────────────────────────────────────────
+        // ─── Vehículos (Mocked in-memory) ──────────────────────────────────────
 
         public async Task<List<VehiculoListDto>> GetAllVehiculosAsync()
-            => await GetAsync<List<VehiculoListDto>>("api/vehiculos") ?? new List<VehiculoListDto>();
-
-        public Task<List<VehiculoLookupDto>> BuscarVehiculosPorPlacaAsync(string term, int? clienteId = null)
         {
-            var query = $"api/vehiculos/buscar?term={Uri.EscapeDataString(term)}";
-            if (clienteId.HasValue) query += $"&clienteId={clienteId}";
-            return GetAsync<List<VehiculoLookupDto>>(query) ?? Task.FromResult(new List<VehiculoLookupDto>());
+            await Task.Delay(50);
+            return _mockVehiculos.ToList();
+        }
+
+        public async Task<List<VehiculoLookupDto>> BuscarVehiculosPorPlacaAsync(string term, int? clienteId = null)
+        {
+            var searchResults = await BuscarVehiculosAsync(term, clienteId);
+            return searchResults;
         }
 
         public async Task<(bool ok, string? error, int vehiculoId)> SaveVehiculoAsync(VehiculoFormDto form)
         {
-            var body = new
-            {
-                form.ClienteId,
-                Placa = form.Placa.Trim().ToUpper(CultureInfo.InvariantCulture),
-                form.MarcaId,
-                form.ModeloId,
-                form.ColorVehiculoId,
-                form.Anio
-            };
+            await Task.Delay(50);
+            var marca = _mockMarcas.FirstOrDefault(m => m.MarcaId == form.MarcaId)?.Nombre ?? "Toyota";
+            var modelo = _mockModelos.FirstOrDefault(m => m.ModeloId == form.ModeloId)?.Nombre ?? "Corolla";
+            var color = _mockColores.FirstOrDefault(c => c.ColorVehiculoId == form.ColorVehiculoId)?.Nombre ?? "Blanco";
 
-            HttpResponseMessage response;
-            if (form.VehiculoId == 0)
-                response = await SendAsync(HttpMethod.Post, "api/vehiculos", body);
-            else
-                response = await SendAsync(HttpMethod.Put, $"api/vehiculos/{form.VehiculoId}", body);
-
-            if (!response.IsSuccessStatusCode)
-                return (false, await ReadErrorAsync(response), 0);
+            string clienteNombre = "Juan Perez";
+            var client = await GetClienteAsync(form.ClienteId);
+            if (client != null)
+                clienteNombre = $"{client.Nombres} {client.PrimerApellido}";
 
             if (form.VehiculoId == 0)
             {
-                var result = await DeserializeAsync<JsonElement>(response);
-                var newId = result.TryGetProperty("id", out var idProp) ? idProp.GetInt32() : 0;
+                var newId = Interlocked.Increment(ref _nextVehiculoId);
+                var veh = new VehiculoListDto
+                {
+                    VehiculoId = newId,
+                    Placa = form.Placa.Trim().ToUpperInvariant(),
+                    ClienteId = form.ClienteId,
+                    ClienteNombre = clienteNombre,
+                    Anio = form.Anio,
+                    MarcaNombre = marca,
+                    ModeloNombre = modelo,
+                    ColorNombre = color
+                };
+                _mockVehiculos.Add(veh);
                 return (true, null, newId);
             }
-            return (true, null, form.VehiculoId);
+            else
+            {
+                var veh = _mockVehiculos.FirstOrDefault(v => v.VehiculoId == form.VehiculoId);
+                if (veh == null) return (false, "Vehículo no encontrado.", 0);
+
+                veh.Placa = form.Placa.Trim().ToUpperInvariant();
+                veh.ClienteId = form.ClienteId;
+                veh.ClienteNombre = clienteNombre;
+                veh.Anio = form.Anio;
+                veh.MarcaNombre = marca;
+                veh.ModeloNombre = modelo;
+                veh.ColorNombre = color;
+
+                return (true, null, form.VehiculoId);
+            }
         }
 
-        public Task DeleteVehiculoAsync(int id) => SendAsync(HttpMethod.Delete, $"api/vehiculos/{id}");
+        public async Task DeleteVehiculoAsync(int id)
+        {
+            await Task.Delay(50);
+            var veh = _mockVehiculos.FirstOrDefault(v => v.VehiculoId == id);
+            if (veh != null) _mockVehiculos.Remove(veh);
+        }
 
-        // ─── Catálogos ────────────────────────────────────────────────────────
+        // ─── Catálogos (Mocked in-memory) ──────────────────────────────────────
 
         public async Task<List<MarcaDto>> GetAllMarcasAsync()
-            => await GetAsync<List<MarcaDto>>("api/marcas") ?? new List<MarcaDto>();
+        {
+            await Task.Delay(10);
+            return _mockMarcas.ToList();
+        }
 
         public async Task<List<ModeloDto>> GetAllModelosAsync()
-            => await GetAsync<List<ModeloDto>>("api/modelos") ?? new List<ModeloDto>();
+        {
+            await Task.Delay(10);
+            return _mockModelos.ToList();
+        }
 
         public async Task<List<ColorVehiculoDto>> GetAllColoresAsync()
-            => await GetAsync<List<ColorVehiculoDto>>("api/coloresvehiculo") ?? new List<ColorVehiculoDto>();
-
-        // ─── Helpers privados ─────────────────────────────────────────────────
-
-        private async Task<T?> GetAsync<T>(string url)
         {
-            try
-            {
-                var request = BuildRequest(HttpMethod.Get, url);
-                var response = await _http.SendAsync(request);
-                if (!response.IsSuccessStatusCode) return default;
-                return await DeserializeAsync<T>(response);
-            }
-            catch
-            {
-                return default;
-            }
+            await Task.Delay(10);
+            return _mockColores.ToList();
         }
 
-        private Task<HttpResponseMessage> SendAsync(HttpMethod method, string url, object? body = null)
-        {
-            var request = BuildRequest(method, url, body);
-            return _http.SendAsync(request);
-        }
+        // ─── Private Helpers ─────────────────────────────────────────────────
 
-        private HttpRequestMessage BuildRequest(HttpMethod method, string url, object? body = null)
+        private async Task<HttpResponseMessage> SendAsync(HttpClient client, HttpMethod method, string url, object? body = null)
         {
             var request = new HttpRequestMessage(method, url);
 
@@ -349,7 +654,7 @@ namespace WebService.Adapters
                     Encoding.UTF8,
                     "application/json");
 
-            return request;
+            return await client.SendAsync(request);
         }
 
         private static async Task<T?> DeserializeAsync<T>(HttpResponseMessage response)
@@ -363,9 +668,15 @@ namespace WebService.Adapters
             try
             {
                 var json = await response.Content.ReadAsStringAsync();
-                var doc = JsonDocument.Parse(json);
-                if (doc.RootElement.TryGetProperty("error", out var errProp))
-                    return errProp.GetString() ?? "Error desconocido.";
+                if (!string.IsNullOrWhiteSpace(json))
+                {
+                    using var doc = JsonDocument.Parse(json);
+                    var root = doc.RootElement;
+                    if (root.TryGetProperty("message", out var msgProp))
+                        return msgProp.GetString() ?? $"Error HTTP {(int)response.StatusCode}.";
+                    if (root.TryGetProperty("error", out var errProp))
+                        return errProp.GetString() ?? $"Error HTTP {(int)response.StatusCode}.";
+                }
             }
             catch { }
             return $"Error HTTP {(int)response.StatusCode}.";

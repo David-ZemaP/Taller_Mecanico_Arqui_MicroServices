@@ -9,11 +9,11 @@ namespace WebService.Pages.Clientes
     [Authorize]
     public class IndexModel : PageModel
     {
-        private readonly OrdenTrabajoAdapter _adapter;
+        private readonly ClientesAdapter _adapter;
 
         public IList<ClienteLookupDto> Clientes { get; set; } = [];
 
-        public IndexModel(OrdenTrabajoAdapter adapter)
+        public IndexModel(ClientesAdapter adapter)
         {
             _adapter = adapter;
         }

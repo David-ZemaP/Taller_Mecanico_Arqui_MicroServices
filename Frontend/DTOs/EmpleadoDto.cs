@@ -63,6 +63,7 @@ namespace WebService.DTOs
         // Nuevo: Rol del usuario (reemplaza NivelAcceso)
         // Mapping: Administrador -> Administrador, Mecanico -> Mecanico
         public string? RolNombre { get; set; }
+        public string? NivelAcceso { get; set; }
     }
 
     public class UsuarioDto
