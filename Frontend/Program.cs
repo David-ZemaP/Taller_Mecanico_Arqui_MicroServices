@@ -43,35 +43,43 @@ builder.Services.AddHttpClient("ServicesApi", client =>
     client.BaseAddress = new Uri(builder.Configuration["BackendUrls:ServicesApi"] ?? "http://localhost:5179/");
 });
 
-// Register Adapters
-builder.Services.AddScoped<UsersServiceAdapter>(sp =>
+// Register Adapters (interface → implementation, with concrete forward for backwards compatibility)
+builder.Services.AddScoped<IUsersServiceAdapter>(sp =>
 {
     var factory = sp.GetRequiredService<IHttpClientFactory>();
     var ctx = sp.GetRequiredService<IHttpContextAccessor>();
     return new UsersServiceAdapter(factory.CreateClient("UsersApi"), ctx);
 });
+builder.Services.AddScoped<UsersServiceAdapter>(sp =>
+    (UsersServiceAdapter)sp.GetRequiredService<IUsersServiceAdapter>());
 
-builder.Services.AddScoped<EmpleadosAdapter>(sp =>
+builder.Services.AddScoped<IEmpleadosAdapter>(sp =>
 {
     var factory = sp.GetRequiredService<IHttpClientFactory>();
     var ctx = sp.GetRequiredService<IHttpContextAccessor>();
     return new EmpleadosAdapter(factory.CreateClient("UsersApi"), ctx);
 });
+builder.Services.AddScoped<EmpleadosAdapter>(sp =>
+    (EmpleadosAdapter)sp.GetRequiredService<IEmpleadosAdapter>());
 
-builder.Services.AddScoped<ClientesAdapter>(sp =>
+builder.Services.AddScoped<IClientesAdapter>(sp =>
 {
     var factory = sp.GetRequiredService<IHttpClientFactory>();
     var ctx = sp.GetRequiredService<IHttpContextAccessor>();
     return new ClientesAdapter(factory.CreateClient("ClientsApi"), ctx);
 });
+builder.Services.AddScoped<ClientesAdapter>(sp =>
+    (ClientesAdapter)sp.GetRequiredService<IClientesAdapter>());
 
-builder.Services.AddScoped<OrdenTrabajoAdapter>(sp =>
+builder.Services.AddScoped<IOrdenTrabajoAdapter>(sp =>
 {
     var factory = sp.GetRequiredService<IHttpClientFactory>();
-    var clientes = sp.GetRequiredService<ClientesAdapter>();
+    var clientes = sp.GetRequiredService<IClientesAdapter>();
     var ctx = sp.GetRequiredService<IHttpContextAccessor>();
     return new OrdenTrabajoAdapter(factory, clientes, ctx);
 });
+builder.Services.AddScoped<OrdenTrabajoAdapter>(sp =>
+    (OrdenTrabajoAdapter)sp.GetRequiredService<IOrdenTrabajoAdapter>());
 
 var app = builder.Build();
 
@@ -91,6 +99,32 @@ app.UseRouting();
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Middleware for forcing password change if user has 'RequiereCambio' claim set to true
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true)
+    {
+        var path = context.Request.Path.Value?.ToLowerInvariant() ?? string.Empty;
+        
+        var isChangePassword = path.StartsWith("/changepassword");
+        var isLogin = path.StartsWith("/login");
+        var isLogout = path.StartsWith("/logout");
+        var isDenied = path.StartsWith("/accesodenegado");
+        var isStatic = path.Contains(".") || path.StartsWith("/lib/") || path.StartsWith("/css/") || path.StartsWith("/js/");
+
+        if (!isChangePassword && !isLogin && !isLogout && !isDenied && !isStatic)
+        {
+            var requiereCambioClaim = context.User.FindFirst("RequiereCambio")?.Value;
+            if (bool.TryParse(requiereCambioClaim, out var requiereCambio) && requiereCambio)
+            {
+                context.Response.Redirect("/ChangePassword");
+                return;
+            }
+        }
+    }
+    await next();
+});
 
 app.MapStaticAssets();
 app.MapRazorPages()

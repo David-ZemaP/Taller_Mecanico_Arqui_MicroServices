@@ -180,7 +180,7 @@ namespace WebService.Pages.Empleados
                 var successMsg = "Empleado creado correctamente.";
                 if (!string.IsNullOrEmpty(plainPassword))
                 {
-                    successMsg += $"<br/><br/><div class='alert alert-info border-secondary text-teal' style='background-color: #1a2c2c;'><i class='bi bi-key-fill me-2'></i><strong>Credenciales de acceso creadas:</strong><br/>Usuario: <code>{FormDto.Email}</code><br/>Contraseña temporal: <strong style='font-size: 1.2rem; color: #20c997; letter-spacing: 1px;'>{plainPassword}</strong></div>";
+                    successMsg += "<br/><br/><div class='alert alert-info border-secondary text-teal' style='background-color: #1a2c2c;'><i class='bi bi-check-circle-fill me-2'></i><strong>Usuario creado.</strong></div>";
                 }
                 TempData["SuccessMessage"] = successMsg;
             }

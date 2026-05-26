@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using MicroServiceProduct.Application.Services;
 using System.ComponentModel.DataAnnotations;
 using MicroServiceProduct.Application.DTOs;
@@ -7,6 +8,7 @@ namespace MicroServiceProduct.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ProductsController : ControllerBase
 {
     private readonly IProductService _svc;

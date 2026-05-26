@@ -105,6 +105,44 @@ namespace WebService.Pages
             return RedirectToPage();
         }
 
+        public async Task<IActionResult> OnGetGenerarEmailAsync(int empleadoId)
+        {
+            var (empOk, emp, _) = await _adapter.GetEmpleadoByIdAsync(empleadoId);
+            if (!empOk || emp == null)
+            {
+                return BadRequest("Empleado no encontrado.");
+            }
+
+            var nombre = emp.Nombre.Trim().ToLowerInvariant();
+            var apellido = emp.PrimerApellido.Trim().ToLowerInvariant();
+            
+            // Sanitizar a letras a-z y números
+            nombre = System.Text.RegularExpressions.Regex.Replace(nombre, @"[^a-z0-9]", "");
+            apellido = System.Text.RegularExpressions.Regex.Replace(apellido, @"[^a-z0-9]", "");
+
+            if (string.IsNullOrEmpty(nombre) || string.IsNullOrEmpty(apellido))
+            {
+                return BadRequest("Datos del empleado insuficientes.");
+            }
+
+            var baseUsername = $"{nombre[0]}{apellido}";
+            var domain = "@taller.com";
+            var email = $"{baseUsername}{domain}";
+
+            // Obtener usuarios del backend para verificar duplicados
+            var (usrOk, usuarios, _) = await _adapter.GetAllUsuariosAsync();
+            var usuariosList = (usuarios ?? Enumerable.Empty<UsuarioDto>()).ToList();
+            
+            int counter = 1;
+            while (usuariosList.Any(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase)))
+            {
+                email = $"{baseUsername}{counter}{domain}";
+                counter++;
+            }
+
+            return new JsonResult(new { email });
+        }
+
         public async Task<IActionResult> OnPostToggleActivoAsync(int id)
         {
             var (ok, user, error) = await _adapter.GetUsuarioByIdAsync(id);

@@ -1,6 +1,9 @@
 using DotNetEnv;
 using Microsoft.OpenApi;
 using Taller_Mecanico_Services.Infrastructure.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +25,30 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+var jwtSection = builder.Configuration.GetSection("JwtSettings");
+var secret = jwtSection["Secret"] ?? "dev-secret-change-me-please-1234567890-abcdef";
+var issuer = jwtSection["Issuer"] ?? "Taller_Mecanico";
+var audience = jwtSection["Audience"] ?? "Taller_Mecanico_Clients";
+var key = Encoding.UTF8.GetBytes(secret);
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateIssuer = true,
+            ValidIssuer = issuer,
+            ValidateAudience = true,
+            ValidAudience = audience,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
 // Registrar todas las dependencias de Infraestructura, Aplicación y Dominio
 builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -36,6 +63,7 @@ app.UseSwaggerUI(options =>
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "Services API v1");
 });
 
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

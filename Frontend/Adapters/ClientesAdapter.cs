@@ -6,7 +6,7 @@ using WebService.DTOs;
 
 namespace WebService.Adapters
 {
-    public class ClientesAdapter
+    public class ClientesAdapter : IClientesAdapter
     {
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;

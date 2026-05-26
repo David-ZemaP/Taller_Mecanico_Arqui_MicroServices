@@ -13,6 +13,17 @@ namespace WebService.Pages.Clientes
 
         public IList<ClienteLookupDto> Clientes { get; set; } = [];
 
+        [BindProperty(SupportsGet = true)]
+        public string? SortBy { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public string? SortDir { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public string? Search { get; set; }
+
+        public string CurrentSort => $"{SortBy ?? "nombre"}-{SortDir ?? "desc"}";
+
         public IndexModel(ClientesAdapter adapter)
         {
             _adapter = adapter;
@@ -20,7 +31,36 @@ namespace WebService.Pages.Clientes
 
         public async Task OnGetAsync()
         {
-            Clientes = await _adapter.GetAllClientesAsync();
+            var all = await _adapter.GetAllClientesAsync();
+
+            // Apply search filter (by name or last name)
+            if (!string.IsNullOrWhiteSpace(Search))
+            {
+                var term = Search.Trim().ToLowerInvariant();
+                all = all.Where(c =>
+                    c.Nombres.ToLowerInvariant().Contains(term) ||
+                    c.PrimerApellido.ToLowerInvariant().Contains(term) ||
+                    (c.SegundoApellido?.ToLowerInvariant().Contains(term) == true) ||
+                    $"{c.Nombres} {c.PrimerApellido}".ToLowerInvariant().Contains(term)
+                ).ToList();
+            }
+
+            // Apply sorting
+            var isDesc = string.Equals(SortDir, "desc", StringComparison.OrdinalIgnoreCase);
+            all = (SortBy?.ToLowerInvariant()) switch
+            {
+                "nombre" when isDesc => all.OrderByDescending(c => c.PrimerApellido)
+                                           .ThenByDescending(c => c.Nombres).ToList(),
+                "nombre" => all.OrderBy(c => c.PrimerApellido)
+                               .ThenBy(c => c.Nombres).ToList(),
+                "fecha" when isDesc => all.OrderByDescending(c => c.FechaRegistro).ToList(),
+                "fecha" => all.OrderBy(c => c.FechaRegistro).ToList(),
+                // Default: name descending
+                _ => all.OrderByDescending(c => c.PrimerApellido)
+                        .ThenByDescending(c => c.Nombres).ToList()
+            };
+
+            Clientes = all;
         }
 
         public async Task<JsonResult> OnGetClienteAsync(int id)

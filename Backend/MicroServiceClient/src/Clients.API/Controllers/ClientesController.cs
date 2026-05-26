@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Taller_Mecanico_Clientes.Application.UseCases.Clientes;
 using Taller_Mecanico_Clientes.Domain.Entities;
 
@@ -6,6 +7,7 @@ namespace Taller_Mecanico_Clientes.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ClientesController : ControllerBase
     {
         private readonly GetClientesUseCase _getClientesUseCase;

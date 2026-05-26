@@ -7,7 +7,7 @@ using WebService.DTOs;
 
 namespace WebService.Adapters
 {
-    public class EmpleadosAdapter
+    public class EmpleadosAdapter : IEmpleadosAdapter
     {
         private readonly HttpClient _http;
         private readonly IHttpContextAccessor _ctx;
