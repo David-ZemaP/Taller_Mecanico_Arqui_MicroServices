@@ -38,6 +38,32 @@ namespace Taller_Mecanico_Users.Tests
             Assert.Equal("test.user@example.com", result.Value.User.Email);
         }
 
+        [Fact]
+        public async Task CreateUser_WhenEmailExists_CreatesUserWithNumericSuffix()
+        {
+            var repo = new FakeUsuarioRepo();
+            var passwordSecurity = new FakePasswordSecurity();
+            var passwordHasher = new FakePasswordHasher();
+            var mailSender = new FakeMailSender();
+            var authHelper = new FakeAuthHelper();
+
+            var useCase = new CreateUserUseCase(
+                repo,
+                mailSender,
+                passwordSecurity,
+                passwordHasher,
+                NullLogger<CreateUserUseCase>.Instance,
+                authHelper);
+
+            var first = await useCase.ExecuteAsync("test.user@example.com");
+            var second = await useCase.ExecuteAsync("test.user@example.com");
+
+            Assert.True(first.IsSuccess);
+            Assert.True(second.IsSuccess);
+            Assert.Equal("test.user@example.com", first.Value!.User.Email);
+            Assert.Equal("test.user1@example.com", second.Value!.User.Email);
+        }
+
         private class FakeUsuarioRepo : IUsuarioLoginRepository
         {
             private readonly List<UsuarioLogin> _storage = new();
@@ -46,7 +72,7 @@ namespace Taller_Mecanico_Users.Tests
 
             public Task<UsuarioLogin?> GetByEmailAsync(string email)
             {
-                var found = _storage.Find(u => u.Email == email);
+                var found = _storage.Find(u => string.Equals(u.Email, email, System.StringComparison.OrdinalIgnoreCase));
                 return Task.FromResult<UsuarioLogin?>(found);
             }
 

@@ -73,7 +73,7 @@ namespace WebService.Pages
 
             if (FormDto.UsuarioLoginId == 0)
             {
-                var (ok, password, notificationRecipients, error) = await _adapter.CreateUsuarioAsync(FormDto.EmpleadoId, FormDto.Email, FormDto.Password);
+                var (ok, password, _, notificationRecipients, error) = await _adapter.CreateUsuarioAsync(FormDto.EmpleadoId, FormDto.Email, FormDto.Password);
                 if (!ok)
                 {
                     ModelState.AddModelError(string.Empty, error ?? "No se pudo crear el usuario.");
