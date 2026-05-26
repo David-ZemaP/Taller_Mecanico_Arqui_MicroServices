@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Taller_Mecanico_Services.Application.DTOs;
 using Taller_Mecanico_Services.Application.UseCases.Categorias;
 
@@ -6,6 +7,7 @@ namespace Taller_Mecanico_Services.API.Controllers
 {
     [ApiController]
     [Route("api/categorias-servicio")]
+    [Authorize]
     public class CategoriasServicioController : ControllerBase
     {
         private readonly CreateCategoriaUseCase _createUseCase;

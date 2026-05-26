@@ -179,6 +179,24 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
+        document.getElementById('FormDto_EmpleadoId')?.addEventListener('change', async function() {
+            var empleadoId = this.value;
+            var emailInput = document.getElementById('FormDto_Email');
+            var userId = document.getElementById('FormDto_UsuarioLoginId').value;
+
+            if (userId === '0' && empleadoId) {
+                try {
+                    var response = await fetch(`?handler=GenerarEmail&empleadoId=${empleadoId}`);
+                    if (response.ok) {
+                        var data = await response.json();
+                        emailInput.value = data.email;
+                    }
+                } catch (error) {
+                    console.error("Error al generar el correo:", error);
+                }
+            }
+        });
+
         function copiarAlPortapapeles(elementId) {
             const element = document.getElementById(elementId);
             navigator.clipboard.writeText(element.value).then(() => {

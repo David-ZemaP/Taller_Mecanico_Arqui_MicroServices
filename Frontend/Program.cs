@@ -100,6 +100,32 @@ app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Middleware for forcing password change if user has 'RequiereCambio' claim set to true
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true)
+    {
+        var path = context.Request.Path.Value?.ToLowerInvariant() ?? string.Empty;
+        
+        var isChangePassword = path.StartsWith("/changepassword");
+        var isLogin = path.StartsWith("/login");
+        var isLogout = path.StartsWith("/logout");
+        var isDenied = path.StartsWith("/accesodenegado");
+        var isStatic = path.Contains(".") || path.StartsWith("/lib/") || path.StartsWith("/css/") || path.StartsWith("/js/");
+
+        if (!isChangePassword && !isLogin && !isLogout && !isDenied && !isStatic)
+        {
+            var requiereCambioClaim = context.User.FindFirst("RequiereCambio")?.Value;
+            if (bool.TryParse(requiereCambioClaim, out var requiereCambio) && requiereCambio)
+            {
+                context.Response.Redirect("/ChangePassword");
+                return;
+            }
+        }
+    }
+    await next();
+});
+
 app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();

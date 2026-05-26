@@ -58,6 +58,15 @@ namespace Taller_Mecanico_Users.Application.UseCases.Users
             }
 
             // 1. Usar la contraseña provista o generar una segura temporal
+            if (!string.IsNullOrWhiteSpace(plainPasswordProvided))
+            {
+                var validationResult = _passwordSecurity.ValidatePassword(plainPasswordProvided);
+                if (validationResult.IsFailure)
+                {
+                    return Result<UserCreationResult>.Failure(validationResult.ErrorCode!, validationResult.ErrorMessage!);
+                }
+            }
+
             string plainPassword = string.IsNullOrWhiteSpace(plainPasswordProvided)
                 ? _passwordSecurity.GenerateSecurePassword()
                 : plainPasswordProvided;
