@@ -43,35 +43,43 @@ builder.Services.AddHttpClient("ServicesApi", client =>
     client.BaseAddress = new Uri(builder.Configuration["BackendUrls:ServicesApi"] ?? "http://localhost:5179/");
 });
 
-// Register Adapters
-builder.Services.AddScoped<UsersServiceAdapter>(sp =>
+// Register Adapters (interface → implementation, with concrete forward for backwards compatibility)
+builder.Services.AddScoped<IUsersServiceAdapter>(sp =>
 {
     var factory = sp.GetRequiredService<IHttpClientFactory>();
     var ctx = sp.GetRequiredService<IHttpContextAccessor>();
     return new UsersServiceAdapter(factory.CreateClient("UsersApi"), ctx);
 });
+builder.Services.AddScoped<UsersServiceAdapter>(sp =>
+    (UsersServiceAdapter)sp.GetRequiredService<IUsersServiceAdapter>());
 
-builder.Services.AddScoped<EmpleadosAdapter>(sp =>
+builder.Services.AddScoped<IEmpleadosAdapter>(sp =>
 {
     var factory = sp.GetRequiredService<IHttpClientFactory>();
     var ctx = sp.GetRequiredService<IHttpContextAccessor>();
     return new EmpleadosAdapter(factory.CreateClient("UsersApi"), ctx);
 });
+builder.Services.AddScoped<EmpleadosAdapter>(sp =>
+    (EmpleadosAdapter)sp.GetRequiredService<IEmpleadosAdapter>());
 
-builder.Services.AddScoped<ClientesAdapter>(sp =>
+builder.Services.AddScoped<IClientesAdapter>(sp =>
 {
     var factory = sp.GetRequiredService<IHttpClientFactory>();
     var ctx = sp.GetRequiredService<IHttpContextAccessor>();
     return new ClientesAdapter(factory.CreateClient("ClientsApi"), ctx);
 });
+builder.Services.AddScoped<ClientesAdapter>(sp =>
+    (ClientesAdapter)sp.GetRequiredService<IClientesAdapter>());
 
-builder.Services.AddScoped<OrdenTrabajoAdapter>(sp =>
+builder.Services.AddScoped<IOrdenTrabajoAdapter>(sp =>
 {
     var factory = sp.GetRequiredService<IHttpClientFactory>();
-    var clientes = sp.GetRequiredService<ClientesAdapter>();
+    var clientes = sp.GetRequiredService<IClientesAdapter>();
     var ctx = sp.GetRequiredService<IHttpContextAccessor>();
     return new OrdenTrabajoAdapter(factory, clientes, ctx);
 });
+builder.Services.AddScoped<OrdenTrabajoAdapter>(sp =>
+    (OrdenTrabajoAdapter)sp.GetRequiredService<IOrdenTrabajoAdapter>());
 
 var app = builder.Build();
 

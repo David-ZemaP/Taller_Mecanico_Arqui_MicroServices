@@ -12,11 +12,11 @@ using WebService.DTOs;
 
 namespace WebService.Adapters
 {
-    public class OrdenTrabajoAdapter
+    public class OrdenTrabajoAdapter : IOrdenTrabajoAdapter
     {
         private readonly HttpClient _httpProducts;
         private readonly HttpClient _httpServices;
-        private readonly ClientesAdapter _clientesAdapter;
+        private readonly IClientesAdapter _clientesAdapter;
         private readonly IHttpContextAccessor _ctx;
 
         private static readonly JsonSerializerOptions _jsonOpts = new()
@@ -157,7 +157,7 @@ namespace WebService.Adapters
             public int CategoriaServicioId { get; set; }
         }
 
-        public OrdenTrabajoAdapter(IHttpClientFactory httpClientFactory, ClientesAdapter clientesAdapter, IHttpContextAccessor ctx)
+        public OrdenTrabajoAdapter(IHttpClientFactory httpClientFactory, IClientesAdapter clientesAdapter, IHttpContextAccessor ctx)
         {
             _httpProducts = httpClientFactory.CreateClient("ProductsApi");
             _httpServices = httpClientFactory.CreateClient("ServicesApi");
