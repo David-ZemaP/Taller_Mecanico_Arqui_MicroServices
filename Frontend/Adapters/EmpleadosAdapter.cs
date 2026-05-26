@@ -13,108 +13,130 @@ namespace WebService.Adapters
         private readonly IHttpContextAccessor _ctx;
         private readonly JsonSerializerOptions _jsonOpts = new() { PropertyNameCaseInsensitive = true };
 
+        // Static list to mock Empleados database in-memory
+        private static readonly List<EmpleadoDto> _mockEmpleados = new()
+        {
+            new EmpleadoDto
+            {
+                EmpleadoId = 1,
+                Nombre = "Juan",
+                PrimerApellido = "Perez",
+                SegundoApellido = "Gomez",
+                Ci = 1234567,
+                CiComplemento = "",
+                Telefono = 77777777,
+                Email = "mecanico1@gmail.com",
+                FechaContratacion = new DateTime(2025, 1, 15),
+                TipoEmpleado = "Mecanico",
+                EstadoLaboral = "Activo",
+                Especialidad = "Motor",
+                SalarioPorHora = 15.0m,
+                SalarioMensual = 2500.0m,
+                NivelAcceso = "Parcial"
+            },
+            new EmpleadoDto
+            {
+                EmpleadoId = 2,
+                Nombre = "Carlos",
+                PrimerApellido = "Ramos",
+                SegundoApellido = "Lopez",
+                Ci = 7654321,
+                CiComplemento = "1F",
+                Telefono = 66666666,
+                Email = "admin@gmail.com",
+                FechaContratacion = new DateTime(2024, 6, 10),
+                TipoEmpleado = "Administrador",
+                EstadoLaboral = "Activo",
+                Especialidad = "General",
+                SalarioPorHora = 25.0m,
+                SalarioMensual = 4000.0m,
+                NivelAcceso = "Completo"
+            }
+        };
+        private static int _nextEmpleadoId = 3;
+
         public EmpleadosAdapter(HttpClient http, IHttpContextAccessor ctx)
         {
             _http = http;
             _ctx = ctx;
         }
 
+        // ─── Empleados CRUD (Mocked in-memory) ─────────────────────────────────
+
         public async Task<(bool ok, IEnumerable<EmpleadoDto>? empleados, string? error)> GetAllEmpleadosAsync()
         {
-            try
-            {
-                var response = await SendAsync(HttpMethod.Get, "api/empleado");
-                if (!response.IsSuccessStatusCode)
-                    return (false, null, await ReadErrorAsync(response));
-
-                var result = await DeserializeAsync<IEnumerable<EmpleadoDto>>(response);
-                return (true, result, null);
-            }
-            catch (Exception)
-            {
-                return (false, null, "No se pudo conectar con el servicio de usuarios.");
-            }
+            await Task.Delay(50); // Simulate network latency
+            return (true, _mockEmpleados.ToList(), null);
         }
 
         public async Task<(bool ok, EmpleadoDto? empleado, string? error)> GetEmpleadoByIdAsync(int id)
         {
-            try
-            {
-                var response = await SendAsync(HttpMethod.Get, $"api/empleado/{id}");
-                if (!response.IsSuccessStatusCode)
-                    return (false, null, await ReadErrorAsync(response));
-
-                var result = await DeserializeAsync<EmpleadoDto>(response);
-                return (true, result, null);
-            }
-            catch (Exception)
-            {
-                return (false, null, "No se pudo conectar con el servicio de usuarios.");
-            }
+            await Task.Delay(50);
+            var emp = _mockEmpleados.FirstOrDefault(e => e.EmpleadoId == id);
+            if (emp == null) return (false, null, "Empleado no encontrado.");
+            return (true, emp, null);
         }
 
         public async Task<(bool ok, int? empleadoId, string? error)> CrearEmpleadoAsync(EmpleadoFormDto form)
         {
-            try
+            await Task.Delay(50);
+            var newId = System.Threading.Interlocked.Increment(ref _nextEmpleadoId);
+            var emp = new EmpleadoDto
             {
-                var body = BuildEmpleadoBody(form);
-                var response = await SendAsync(HttpMethod.Post, "api/empleado", body);
-                if (!response.IsSuccessStatusCode)
-                    return (false, null, await ReadErrorAsync(response));
-
-                // La API devuelve { "EmpleadoId": <id> } al crear
-                var json = await response.Content.ReadAsStringAsync();
-                int? newId = null;
-                if (!string.IsNullOrWhiteSpace(json))
-                {
-                    var parsed = JsonSerializer.Deserialize<EmpleadoCreatedDto>(json, _jsonOpts);
-                    newId = parsed?.EmpleadoId;
-                }
-                return (true, newId, null);
-            }
-            catch (Exception)
-            {
-                return (false, null, "No se pudo conectar con el servicio de usuarios.");
-            }
-        }
-
-        private sealed class EmpleadoCreatedDto
-        {
-            public int? EmpleadoId { get; set; }
+                EmpleadoId = newId,
+                Nombre = form.Nombres,
+                PrimerApellido = form.PrimerApellido,
+                SegundoApellido = form.SegundoApellido,
+                Ci = form.CiNumero,
+                CiComplemento = form.CiComplemento,
+                Telefono = form.Telefono,
+                Email = form.Email,
+                FechaContratacion = form.FechaContratacion,
+                TipoEmpleado = form.TipoEmpleado,
+                EstadoLaboral = form.EstadoLaboral,
+                Especialidad = form.Especialidad,
+                SalarioPorHora = form.SalarioPorHora,
+                SalarioMensual = form.SalarioMensual,
+                NivelAcceso = form.TipoEmpleado == "Administrador" ? (form.NivelAcceso ?? "Completo") : "Parcial"
+            };
+            _mockEmpleados.Add(emp);
+            return (true, newId, null);
         }
 
         public async Task<(bool ok, string? error)> ActualizarEmpleadoAsync(int id, EmpleadoFormDto form)
         {
-            try
-            {
-                var body = BuildEmpleadoBody(form);
-                var response = await SendAsync(HttpMethod.Put, $"api/empleado/{id}", body);
-                if (!response.IsSuccessStatusCode)
-                    return (false, await ReadErrorAsync(response));
+            await Task.Delay(50);
+            var emp = _mockEmpleados.FirstOrDefault(e => e.EmpleadoId == id);
+            if (emp == null) return (false, "Empleado no encontrado.");
 
-                return (true, null);
-            }
-            catch (Exception)
-            {
-                return (false, "No se pudo conectar con el servicio de usuarios.");
-            }
+            emp.Nombre = form.Nombres;
+            emp.PrimerApellido = form.PrimerApellido;
+            emp.SegundoApellido = form.SegundoApellido;
+            emp.Ci = form.CiNumero;
+            emp.CiComplemento = form.CiComplemento;
+            emp.Telefono = form.Telefono;
+            emp.Email = form.Email;
+            emp.FechaContratacion = form.FechaContratacion;
+            emp.TipoEmpleado = form.TipoEmpleado;
+            emp.EstadoLaboral = form.EstadoLaboral;
+            emp.Especialidad = form.Especialidad;
+            emp.SalarioPorHora = form.SalarioPorHora;
+            emp.SalarioMensual = form.SalarioMensual;
+            emp.NivelAcceso = form.TipoEmpleado == "Administrador" ? (form.NivelAcceso ?? "Completo") : "Parcial";
+
+            return (true, null);
         }
 
         public async Task<(bool ok, string? error)> EliminarEmpleadoAsync(int id)
         {
-            try
-            {
-                var response = await SendAsync(HttpMethod.Delete, $"api/empleado/{id}");
-                if (!response.IsSuccessStatusCode)
-                    return (false, await ReadErrorAsync(response));
-
-                return (true, null);
-            }
-            catch (Exception)
-            {
-                return (false, "No se pudo conectar con el servicio de usuarios.");
-            }
+            await Task.Delay(50);
+            var emp = _mockEmpleados.FirstOrDefault(e => e.EmpleadoId == id);
+            if (emp == null) return (false, "Empleado no encontrado.");
+            _mockEmpleados.Remove(emp);
+            return (true, null);
         }
+
+        // ─── Usuarios/Cuentas (Conectados al Microservicio Real) ───────────────
 
         public async Task<(bool ok, IEnumerable<UsuarioDto>? usuarios, string? error)> GetAllUsuariosAsync()
         {
@@ -154,16 +176,26 @@ namespace WebService.Adapters
         {
             try
             {
-                var response = await SendAsync(HttpMethod.Get, $"api/users/empleado/{empleadoId}");
-                if (!response.IsSuccessStatusCode)
-                    return (false, null, await ReadErrorAsync(response));
+                // Buscar el empleado en el mock para obtener su email
+                var emp = _mockEmpleados.FirstOrDefault(e => e.EmpleadoId == empleadoId);
+                if (emp == null || string.IsNullOrWhiteSpace(emp.Email))
+                    return (false, null, "Empleado no encontrado en el mock.");
 
-                var result = await DeserializeAsync<UsuarioDto>(response);
-                return (true, result, null);
+                // Obtener todos los usuarios del backend
+                var (ok, usuarios, error) = await GetAllUsuariosAsync();
+                if (!ok || usuarios == null)
+                    return (false, null, error ?? "No se pudieron obtener los usuarios del backend.");
+
+                // Buscar el usuario que tiene el email del empleado
+                var matchedUser = usuarios.FirstOrDefault(u => u.Email.Equals(emp.Email, StringComparison.OrdinalIgnoreCase));
+                if (matchedUser == null)
+                    return (false, null, "No se encontró cuenta de usuario para este empleado.");
+
+                return (true, matchedUser, null);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return (false, null, "No se pudo conectar con el servicio de usuarios.");
+                return (false, null, $"Error al asociar empleado con usuario: {ex.Message}");
             }
         }
 
@@ -171,7 +203,8 @@ namespace WebService.Adapters
         {
             try
             {
-                var body = new { empleadoId, email, password };
+                // Registrar el usuario en el backend. Nota: request.Email y request.Password son pasados
+                var body = new { email, password };
                 var response = await SendAsync(HttpMethod.Post, "api/users", body);
                 if (!response.IsSuccessStatusCode)
                     return (false, null, null, await ReadErrorAsync(response));
@@ -261,23 +294,7 @@ namespace WebService.Adapters
             }
         }
 
-        private static object BuildEmpleadoBody(EmpleadoFormDto form) => new
-        {
-            nombre = form.Nombres,
-            primerApellido = form.PrimerApellido,
-            segundoApellido = form.SegundoApellido,
-            ci = form.CiNumero,
-            ciComplemento = form.CiComplemento,
-            telefono = form.Telefono,
-            email = form.Email,
-            fechaContratacion = form.FechaContratacion,
-            tipoEmpleado = form.TipoEmpleado,
-            estadoLaboral = form.EstadoLaboral,
-            especialidad = form.Especialidad,
-            salarioPorHora = form.SalarioPorHora,
-            salarioMensual = form.SalarioMensual
-            // El rol se maneja por separado a través del usuario
-        };
+        // ─── Helpers privados ─────────────────────────────────────────────────
 
         private async Task<HttpResponseMessage> SendAsync(HttpMethod method, string endpoint, object? body = null)
         {

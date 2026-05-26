@@ -26,6 +26,21 @@ builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
 
+// Automatically apply EF Core migrations on startup
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ProductsDbContext>();
+    try
+    {
+        dbContext.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetService<ILogger<Program>>();
+        logger?.LogError(ex, "Error al aplicar migraciones de base de datos en Productos.");
+    }
+}
+
 // Configure the HTTP request pipeline.
 // Always map OpenAPI/UI so the Swagger UI is available inside containers.
 app.MapOpenApi();
