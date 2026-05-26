@@ -13,38 +13,21 @@ namespace Taller_Mecanico_Clientes.Application.UseCases.Clientes
             _repository = repository;
         }
 
-        public async Task<Result<Cliente>> ExecuteAsync(Cliente cliente)
+        public async Task<Result<Cliente>> ExecuteAsync(
+            string nombre,
+            string primerApellido,
+            string? segundoApellido,
+            int ci,
+            string? ciComplemento,
+            int telefono,
+            string email,
+            string? tipoCliente = null)
         {
-            if (string.IsNullOrWhiteSpace(cliente.Nombre))
-            {
-                return Result<Cliente>.Failure(ErrorCodes.ValidationRequired, "El nombre del cliente es requerido.");
-            }
-            if (string.IsNullOrWhiteSpace(cliente.PrimerApellido))
-            {
-                return Result<Cliente>.Failure(ErrorCodes.ValidationRequired, "El primer apellido del cliente es requerido.");
-            }
-            if (string.IsNullOrWhiteSpace(cliente.Email))
-            {
-                return Result<Cliente>.Failure(ErrorCodes.ValidationRequired, "El email del cliente es requerido.");
-            }
-            if (cliente.Telefono <= 0)
-            {
-                return Result<Cliente>.Failure(ErrorCodes.ValidationRequired, "El número de teléfono debe ser un valor válido.");
-            }
-            if (cliente.Ci <= 0)
-            {
-                return Result<Cliente>.Failure(ErrorCodes.ValidationRequired, "El número de CI (cédula de identidad) debe ser un valor válido.");
-            }
+            var result = Cliente.Crear(nombre, primerApellido, segundoApellido, ci, ciComplemento, telefono, email, tipoCliente);
+            if (result.IsFailure)
+                return result;
 
-            cliente.FechaRegistro = DateTime.UtcNow;
-            cliente.IsDeleted = false;
-            
-            if (string.IsNullOrWhiteSpace(cliente.TipoCliente))
-            {
-                cliente.TipoCliente = "Regular";
-            }
-
-            return await _repository.CreateAsync(cliente);
+            return await _repository.CreateAsync(result.Value!);
         }
     }
 }

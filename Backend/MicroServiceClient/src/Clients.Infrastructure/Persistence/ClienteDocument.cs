@@ -56,25 +56,24 @@ namespace Taller_Mecanico_Clientes.Infrastructure.Persistence
 
         public Cliente ToEntity()
         {
-            return new Cliente
-            {
-                Id = this.Id,
-                Nombre = this.Nombre,
-                PrimerApellido = this.PrimerApellido,
-                SegundoApellido = this.SegundoApellido,
-                Ci = this.Ci,
-                CiComplemento = this.CiComplemento,
-                Telefono = this.Telefono,
-                Email = this.Email,
-                UsuarioLoginId = this.UsuarioLoginId,
-                CreadoPor = this.CreadoPor,
-                ActualizadoPor = this.ActualizadoPor,
-                EliminadoPor = this.EliminadoPor,
-                FechaActualizacion = this.FechaActualizacion,
-                IsDeleted = this.IsDeleted,
-                FechaRegistro = this.FechaRegistro,
-                TipoCliente = this.TipoCliente
-            };
+            // Should never fail for valid Firestore data
+            return Cliente.Reconstituir(
+                id: this.Id,
+                nombre: this.Nombre,
+                primerApellido: this.PrimerApellido,
+                segundoApellido: this.SegundoApellido,
+                ci: this.Ci,
+                ciComplemento: this.CiComplemento,
+                telefono: this.Telefono,
+                email: this.Email,
+                usuarioLoginId: this.UsuarioLoginId,
+                creadoPor: this.CreadoPor,
+                actualizadoPor: this.ActualizadoPor,
+                eliminadoPor: this.EliminadoPor,
+                fechaActualizacion: this.FechaActualizacion,
+                isDeleted: this.IsDeleted,
+                fechaRegistro: this.FechaRegistro,
+                tipoCliente: this.TipoCliente).Value!;
         }
 
         public static ClienteDocument FromEntity(Cliente entity)
