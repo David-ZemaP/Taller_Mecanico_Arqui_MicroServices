@@ -16,38 +16,42 @@ public class ProductService : IProductService
     public async Task<IEnumerable<ProductDto>> GetAllAsync(CancellationToken ct = default)
     {
         var items = await _repo.GetAllAsync(ct);
-        return items.Select(p => new ProductDto(p.Id, p.Name, p.Description, p.Price, p.CreatedAt));
+        return items.Select(ToDto);
     }
 
     public async Task<ProductDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         var p = await _repo.GetByIdAsync(id, ct);
-        return p is null ? null : new ProductDto(p.Id, p.Name, p.Description, p.Price, p.CreatedAt);
+        return p is null ? null : ToDto(p);
     }
 
-    public async Task<ProductDto> CreateAsync(string name, string? description, decimal price, CancellationToken ct = default)
+    public async Task<ProductDto> CreateAsync(string name, string? description, decimal price, int stock, string? createdBy, CancellationToken ct = default)
     {
-        var p = new Product { Id = Guid.NewGuid(), Name = name, Description = description, Price = price };
+        var p = new Product { Id = Guid.NewGuid(), Name = name, Description = description, Price = price, Stock = stock, CreatedBy = createdBy };
         await _repo.AddAsync(p, ct);
-        return new ProductDto(p.Id, p.Name, p.Description, p.Price, p.CreatedAt);
+        return ToDto(p);
     }
 
-    public async Task<bool> UpdateAsync(Guid id, string name, string? description, decimal price, CancellationToken ct = default)
+    public async Task<bool> UpdateAsync(Guid id, string name, string? description, decimal price, int stock, CancellationToken ct = default)
     {
         var existing = await _repo.GetByIdAsync(id, ct);
         if (existing is null) return false;
         existing.Name = name;
         existing.Description = description;
         existing.Price = price;
+        existing.Stock = stock;
         await _repo.UpdateAsync(existing, ct);
         return true;
     }
 
-    public async Task<bool> DeleteAsync(Guid id, CancellationToken ct = default)
+    public async Task<bool> DeleteAsync(Guid id, string? deletedBy, CancellationToken ct = default)
     {
         var existing = await _repo.GetByIdAsync(id, ct);
         if (existing is null) return false;
-        await _repo.DeleteAsync(id, ct);
+        await _repo.DeleteAsync(id, deletedBy, ct);
         return true;
     }
+
+    private static ProductDto ToDto(Product p)
+        => new(p.Id, p.Name, p.Description, p.Price, p.Stock, p.CreatedAt, p.CreatedBy, p.DeletedBy);
 }

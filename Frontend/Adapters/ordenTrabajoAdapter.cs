@@ -121,7 +121,6 @@ namespace WebService.Adapters
         // --- Product ID Mapping Concurrent Dictionaries ---
         private static readonly ConcurrentDictionary<int, Guid> _productIntToGuid = new();
         private static readonly ConcurrentDictionary<Guid, int> _productGuidToInt = new();
-        private static readonly ConcurrentDictionary<Guid, int> _productStock = new();
         private static int _nextProductId = 0;
 
         private static int GetOrAddProductIntId(Guid guid)
@@ -146,6 +145,7 @@ namespace WebService.Adapters
             public string Name { get; set; } = string.Empty;
             public string? Description { get; set; }
             public decimal Price { get; set; }
+            public int Stock { get; set; }
         }
 
         private class BackendService
@@ -361,7 +361,7 @@ namespace WebService.Adapters
                     ProductoId = GetOrAddProductIntId(p.Id),
                     Nombre = p.Name,
                     Precio = (double)p.Price,
-                    Stock = _productStock.TryGetValue(p.Id, out var s) ? s : 10
+                    Stock = p.Stock
                 }).ToList();
             }
             catch
@@ -388,7 +388,7 @@ namespace WebService.Adapters
                     ProductoId = id,
                     Nombre = p.Name,
                     Precio = (double)p.Price,
-                    Stock = _productStock.TryGetValue(p.Id, out var s) ? s : 10
+                    Stock = p.Stock
                 };
             }
             catch
@@ -406,7 +406,8 @@ namespace WebService.Adapters
                 {
                     name = form.Nombre,
                     description = form.Nombre,
-                    price = (decimal)form.Precio
+                    price = (decimal)form.Precio,
+                    stock = form.Stock
                 };
 
                 if (form.ProductoId == 0)
@@ -417,8 +418,7 @@ namespace WebService.Adapters
                         var createdProduct = await DeserializeAsync<BackendProduct>(response);
                         if (createdProduct != null)
                         {
-                            var intId = GetOrAddProductIntId(createdProduct.Id);
-                            _productStock[createdProduct.Id] = form.Stock;
+                            GetOrAddProductIntId(createdProduct.Id);
                         }
                     }
                 }
@@ -428,10 +428,6 @@ namespace WebService.Adapters
                     if (guid == Guid.Empty) return (false, "ID de producto inválido.");
 
                     response = await SendAsync(_httpProducts, HttpMethod.Put, $"api/products/{guid}", body);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        _productStock[guid] = form.Stock;
-                    }
                 }
 
                 if (!response.IsSuccessStatusCode)
