@@ -40,10 +40,10 @@
             </select>
         </div>
         <div class="col-md-2">
-            <label class="form-label text-teal small mb-1"><i class="bi bi-arrow-up-down me-1"></i>Dirección</label>
+            <label class="form-label text-teal small mb-1"><i class="bi bi-arrow-up-down me-1"></i>Orden</label>
             <select name="sortDir" class="form-select form-control-dark" onchange="this.form.submit()">
-                <option value="desc" selected="@(Model.SortDir == "desc" || string.IsNullOrEmpty(Model.SortDir))">Z-A / Más nuevo</option>
-                <option value="asc" selected="@(Model.SortDir == "asc")">A-Z / Más antiguo</option>
+                <option value="desc" selected="@(Model.SortDir == "desc" || string.IsNullOrEmpty(Model.SortDir))">Descendente</option>
+                <option value="asc" selected="@(Model.SortDir == "asc")">Ascendente</option>
             </select>
         </div>
         <div class="col-md-2 d-grid">
