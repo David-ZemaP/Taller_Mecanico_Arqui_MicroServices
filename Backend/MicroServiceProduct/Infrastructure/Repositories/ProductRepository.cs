@@ -20,13 +20,14 @@ public class ProductRepository : IProductRepository
         await _db.SaveChangesAsync(ct);
     }
 
-    public async Task DeleteAsync(Guid id, CancellationToken ct = default)
+    public async Task DeleteAsync(Guid id, string? deletedBy, CancellationToken ct = default)
     {
         var p = await _db.Products.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (p is null) return;
         // Soft delete
         p.IsDeleted = true;
         p.DeletedAt = DateTime.UtcNow;
+        p.DeletedBy = deletedBy;
         _db.Products.Update(p);
         await _db.SaveChangesAsync(ct);
     }
